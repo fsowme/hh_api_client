@@ -2,14 +2,12 @@ name: headhunter workflow
 on:
   push:
     branches:
-      - start_app
+      - master
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: start_app
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -26,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-      # TODO: try remove checkout repo
       - name: Check out the repo
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
@@ -47,8 +44,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          ref: start_app
       - name: Copy files from repo via scp
         uses: appleboy/scp-action@master
         with:

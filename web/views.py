@@ -1,8 +1,7 @@
 import requests
 from flask import redirect, request, session
-
+from urllib.parse import urlencode
 from web.config import Config
-
 
 def test():
     # test code
@@ -14,7 +13,14 @@ def test():
 
 def oauth():
     if not (code := request.args.get("code")):
-        return redirect(Config.REDIRECT_URL)
+        params = {
+            'response_type': 'code',
+            'client_id': Config.CLIENT_ID,
+            'redirect_uri': Config.REDIRECT_URL
+        }
+        hh_auth_url = "".join([Config.REG_URL, "?", str(urlencode(params))])
+        print(hh_auth_url)
+        return redirect(hh_auth_url)
     data = {
         "grant_type": Config.GRANT_TYPE,
         "client_id": Config.CLIENT_ID,

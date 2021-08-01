@@ -14,3 +14,4 @@ class Config:
     GRANT_TYPE = os.getenv("GRANT_TYPE")
     CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+    REG_URL = os.getenv('REG_URL')
