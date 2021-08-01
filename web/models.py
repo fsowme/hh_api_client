@@ -2,9 +2,9 @@ from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from .config import CONFIG
+from web.config import Config
 
-engine = create_engine(CONFIG.DB, convert_unicode=True)
+engine = create_engine(Config.DB, convert_unicode=True)
 db_session = scoped_session(sessionmaker(engine))
 Base = declarative_base()
 

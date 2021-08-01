@@ -1,0 +1,10 @@
+venv/
+__pycache__
+.vscode
+.env
+.idea
+docker-compose.yaml
+Dockerfile
+nginx.conf
+.github
+*.db
