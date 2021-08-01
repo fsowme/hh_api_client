@@ -40,16 +40,15 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: fsow/foodgram_psql:latest
+          tags: fsow/headhunter:latest
   deploy:
     runs-on: ubuntu-latest
-    needs: tests
+    needs: build_and_push_to_docker_hub
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
         with:
           ref: start_app
-
       - name: Copy files from repo via scp
         uses: appleboy/scp-action@master
         with:
@@ -57,9 +56,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          source: "docker-compose.yaml,nginx.conf"
-          target: "~"
-          strip_components: 1
+          source: "docker-compose.yaml"
+          target: ~/${{ secrets.PROJECT_PATH }}/
 
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -72,20 +70,22 @@ jobs:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          envs: FLASK_SECRET_KEY,DB,REDIRECT_URL,TOKEN_URL,GRANT_TYPE,CLIENT_ID,CLIENT_SECRET,USER_PASSWORD
+          envs: FLASK_SECRET_KEY,DB,REDIRECT_URL,TOKEN_URL,GRANT_TYPE,CLIENT_ID,CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH
           script: |
-            echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > ~/.env && \
-            echo "DB=$DB" > ~/.env && \
-            echo "REDIRECT_URL=$REDIRECT_URL" > ~/.env && \
-            echo "TOKEN_URL=$TOKEN_URL" > ~/.env && \
-            echo "GRANT_TYPE=$GRANT_TYPE" > ~/.env && \
-            echo "CLIENT_ID=$CLIENT_ID" > ~/.env && \
-            echo "CLIENT_SECRET=$CLIENT_SECRET" > ~/.env && \
-            echo $USER_PASSWORD | sudo -S docler-compose pull
-            echo $USER_PASSWORD | sudo -S docler-compose up -d
+            cd ~/$PROJECT_PATH && \
+            echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > .env && \
+            echo "DB=$DB" >> .env && \
+            echo "REDIRECT_URL=$REDIRECT_URL" >> .env && \
+            echo "TOKEN_URL=$TOKEN_URL" >> .env && \
+            echo "GRANT_TYPE=$GRANT_TYPE" >> .env && \
+            echo "CLIENT_ID=$CLIENT_ID" >> .env && \
+            echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env && \
+            echo $USER_PASSWORD | sudo -S docker-compose pull
+            echo $USER_PASSWORD | sudo -S docker-compose up -d
 
