@@ -1,7 +1,10 @@
+from urllib.parse import urlencode
+
 import requests
 from flask import redirect, request, session
-from urllib.parse import urlencode
+
 from web.config import Config
+
 
 def test():
     # test code
