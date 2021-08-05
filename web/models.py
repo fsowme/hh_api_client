@@ -1,21 +1,12 @@
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from web.config import Config
-
-engine = create_engine(Config.DB, convert_unicode=True)
-db_session = scoped_session(sessionmaker(engine))
-Base = declarative_base()
+from flask_sqlalchemy import SQLAlchemy
 
 
-class User(Base):
+db = SQLAlchemy()
+
+
+class User(db.Model):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
-    access_token = Column(String(100), unique=True, nullable=False)
-    refresh_token = Column(String(100), unique=True, nullable=False)
-
-
-def shutdown_db_session(exception=None):
-    db_session.remove()
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    access_token = db.Column(db.String(100), unique=True, nullable=False)
+    refresh_token = db.Column(db.String(100), unique=True, nullable=False)

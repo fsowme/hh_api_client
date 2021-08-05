@@ -3,23 +3,19 @@ from urllib.parse import urlencode
 import requests
 from flask import redirect, request, session
 
-from web.config import Config
+from .config import Config
 
 
 def test():
-    # test code
-    # user = User(name="name_1", access_token="at_1", refresh_token="rt_1")
-    # db_session.add(user)
-    # db_session.commit()
     return {"test": True}
 
 
 def oauth():
     if not (code := request.args.get("code")):
         params = {
-            'response_type': 'code',
-            'client_id': Config.CLIENT_ID,
-            'redirect_uri': Config.REDIRECT_URL
+            "response_type": "code",
+            "client_id": Config.CLIENT_ID,
+            "redirect_uri": Config.REDIRECT_URL,
         }
         hh_auth_url = "".join([Config.REG_URL, "?", str(urlencode(params))])
         print(hh_auth_url)
