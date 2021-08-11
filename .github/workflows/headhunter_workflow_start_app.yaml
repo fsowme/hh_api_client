@@ -2,7 +2,7 @@ name: headhunter workflow
 on:
   push:
     branches:
-      - workflow
+      - master
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -18,7 +18,7 @@ jobs:
           pip install flake8
           pip install -r ${{ secrets.PROJECT_PATH }}/requirements.txt
       - name: Lint with flake8
-        run: flake8 --exclude 'venv' ./${{ secrets.PROJECT_PATH }}
+        run: flake8 --exclude 'venv','migrations' ./${{ secrets.PROJECT_PATH }}
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
@@ -38,8 +38,8 @@ jobs:
         with:
           push: true
           tags: fsow/headhunter:latest
-          context: ${{ secrets.PROJECT_PATH }}
-          file: ./Dockefile
+          context: ./${{ secrets.PROJECT_PATH }}
+          file: ./Dockerfile
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
