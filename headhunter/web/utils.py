@@ -7,9 +7,11 @@ from .errors import TokenValidationError
 
 
 class UserToken:
-    def __init__(self, access: str, refresh: str, expire_at: int) -> None:
-        self.access_token = access
-        self.refresh_token = refresh
+    def __init__(
+        self, access_token: str, refresh_token: str, expire_at: int
+    ) -> None:
+        self.access_token = access_token
+        self.refresh_token = refresh_token
         self.expire_at = expire_at
 
     def update_token(self, force=False) -> bool:
@@ -62,5 +64,5 @@ class UserToken:
         except (TypeError, ValueError):
             error_text = "Field 'expires_in' contain invalid data ({})"
             raise TokenValidationError(error_text.format(expires_in))
-        valid_data["expires_at"] = expires_in + expire_offset
+        valid_data["expire_at"] = int(expires_in) + expire_offset
         return valid_data

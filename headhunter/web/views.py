@@ -3,7 +3,13 @@ from urllib.parse import urlencode
 from flask import redirect, request
 
 from .config import Config
+from .db_manager import DBManager
+from .hh_requests import HHRequester
+from .models import User
 from .utils import UserToken
+
+USER_MANAGER = DBManager(User)
+HH_REQUESTER = HHRequester()
 
 
 def test():
@@ -20,3 +26,11 @@ def oauth():
         hh_auth_url = "".join([Config.REG_URL, "?", str(urlencode(params))])
         return redirect(hh_auth_url)
     token = UserToken.get_user_token(code)
+    user_info = HH_REQUESTER.get_user_info(token)
+    user_email = user_info["email"]
+    USER_MANAGER.update_or_create(email=user_email, defaults=token.__dict__)
+    return {
+        "at": token.access_token,
+        "rt": token.refresh_token,
+        "ea": token.expire_at,
+    }

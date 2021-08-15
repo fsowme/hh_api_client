@@ -1,13 +1,22 @@
 from typing import Tuple
 
-from web import db
+from .models import db
 
 
 class DBManager:
+    class DescQuery:
+        def __get__(self, instance: "DBManager", owner):
+            return instance.session.query(instance.model)
+
+        def __set__(self, instance, value):
+            raise AttributeError("Can't rewrite attribute 'query'")
+
+    query = DescQuery()
+
     def __init__(self, model: db.Model) -> None:
         self.model = model
         self.session = db.session
-        self.query = self.session.query(self.model)
+        # self.query = self.session.query(self.model)
 
     def commit(self, instance: db.Model) -> db.Model:
         try:
