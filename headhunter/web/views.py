@@ -1,9 +1,9 @@
 from urllib.parse import urlencode
 
-import requests
-from flask import redirect, request, session
+from flask import redirect, request
 
 from .config import Config
+from .utils import UserToken
 
 
 def test():
@@ -19,15 +19,4 @@ def oauth():
         }
         hh_auth_url = "".join([Config.REG_URL, "?", str(urlencode(params))])
         return redirect(hh_auth_url)
-    data = {
-        "grant_type": Config.GRANT_TYPE,
-        "client_id": Config.CLIENT_ID,
-        "client_secret": Config.CLIENT_SECRET,
-        "code": code,
-    }
-    response = requests.post(Config.TOKEN_URL, data=data)
-    # TODO: validate hh answer instead raise_for_status()
-    response.raise_for_status()
-    response_data: dict = response.json()
-    session.update(response_data)
-    return response_data
+    token = UserToken.get_user_token(code)

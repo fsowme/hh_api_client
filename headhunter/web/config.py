@@ -17,7 +17,9 @@ class Config:
     REDIRECT_URL = os.getenv("REDIRECT_URL")
     # hh.ru
     TOKEN_URL = os.getenv("TOKEN_URL")
-    GRANT_TYPE = os.getenv("GRANT_TYPE")
+    GRANT_TYPE_CODE = os.getenv("GRANT_TYPE")
+    GRANT_TYPE_REFRESH = os.getenv("GRANT_TYPE_REFRESH")
+    GRANT_TYPE_CC = os.getenv("GRANT_TYPE_CC")
     CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
     REG_URL = os.getenv("REG_URL")
