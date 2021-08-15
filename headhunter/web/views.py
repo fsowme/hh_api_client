@@ -18,7 +18,6 @@ def oauth():
             "redirect_uri": Config.REDIRECT_URL,
         }
         hh_auth_url = "".join([Config.REG_URL, "?", str(urlencode(params))])
-        print(hh_auth_url)
         return redirect(hh_auth_url)
     data = {
         "grant_type": Config.GRANT_TYPE,

@@ -12,7 +12,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = (
         os.getenv("DB") or f"sqlite:///{os.path.join(basedir, 'sqlite.db')}"
     )
-    print(SQLALCHEMY_DATABASE_URI)
+    JSON_AS_ASCII = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REDIRECT_URL = os.getenv("REDIRECT_URL")
     # hh.ru
