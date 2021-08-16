@@ -6,7 +6,7 @@ from .config import Config
 from .db_manager import DBManager
 from .hh_requests import HHRequester
 from .models import User
-from .utils import UserToken
+from .tokens import UserToken
 
 USER_MANAGER = DBManager(User)
 HH_REQUESTER = HHRequester()

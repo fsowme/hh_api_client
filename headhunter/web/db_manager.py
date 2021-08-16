@@ -1,14 +1,16 @@
-from typing import Tuple
+from typing import Any, Tuple
+
+from sqlalchemy.orm.query import Query
 
 from .models import db
 
 
 class DBManager:
     class DescQuery:
-        def __get__(self, instance: "DBManager", owner):
+        def __get__(self, instance: "DBManager", owner: type) -> Query:
             return instance.session.query(instance.model)
 
-        def __set__(self, instance, value):
+        def __set__(self, instance: "DBManager", value: Any):
             raise AttributeError("Can't rewrite attribute 'query'")
 
     query = DescQuery()
@@ -16,7 +18,6 @@ class DBManager:
     def __init__(self, model: db.Model) -> None:
         self.model = model
         self.session = db.session
-        # self.query = self.session.query(self.model)
 
     def commit(self, instance: db.Model) -> db.Model:
         try:

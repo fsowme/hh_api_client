@@ -4,3 +4,11 @@ class ValidationError(Exception):
 
 class TokenValidationError(ValidationError):
     pass
+
+
+class DBManagerError(Exception):
+    pass
+
+
+class CommitError(DBManagerError):
+    pass

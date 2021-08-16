@@ -1,7 +1,7 @@
 import requests
 
 from .config import Config
-from .utils import UserToken
+from .tokens import UserToken
 
 
 class HHRequester:
