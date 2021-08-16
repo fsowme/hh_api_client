@@ -4,6 +4,7 @@ import requests
 
 from .config import Config
 from .errors import TokenValidationError
+from .hh_requests import HHAnswerValidator
 
 
 class UserToken:
@@ -22,8 +23,8 @@ class UserToken:
             "refresh_token": self.refresh_token,
         }
         response = requests.post(url=Config.TOKEN_URL, data=data)
-        response.raise_for_status()
-        response_data = response.json()
+        response_validator = HHAnswerValidator(response)
+        response_data = response_validator.token_response_validation()
         valid_token_data = self.validate_hh_token(response_data)
         self.__init__(**valid_token_data)
         return True
@@ -39,9 +40,8 @@ class UserToken:
         }
         response = requests.post(url=Config.TOKEN_URL, data=data)
         now = int(time.time())
-        # TODO: validate hh answer instead raise_for_status()
-        response.raise_for_status()
-        response_data: dict = response.json()
+        response_validator = HHAnswerValidator(response)
+        response_data = response_validator.token_response_validation()
         valid_token_data = cls.validate_hh_token(response_data, now)
         return cls(**valid_token_data)
 
