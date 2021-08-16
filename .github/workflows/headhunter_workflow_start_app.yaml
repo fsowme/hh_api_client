@@ -18,7 +18,7 @@ jobs:
           pip install flake8
           pip install -r ${{ secrets.PROJECT_PATH }}/requirements.txt
       - name: Lint with flake8
-        run: flake8 --exclude 'venv','migrations' ./${{ secrets.PROJECT_PATH }}
+        run: flake8 --exclude 'venv','migrations','errors.py' ./${{ secrets.PROJECT_PATH }}
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
