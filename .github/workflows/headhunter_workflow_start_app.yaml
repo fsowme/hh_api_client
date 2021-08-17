@@ -60,10 +60,13 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           FLASK_SECRET_KEY: ${{ secrets.FLASK_SECRET_KEY }}
-          DB: ${{ secrets.DB }}
           REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+          HH_BASE_URL: ${{ secrets.HH_BASE_URL }}
+          REG_URL: ${{ secrets.REG_URL }}
           TOKEN_URL: ${{ secrets.TOKEN_URL }}
-          GRANT_TYPE: ${{ secrets.GRANT_TYPE }}
+          GRANT_TYPE_CODE: ${{ secrets.GRANT_TYPE_CODE }}
+          GRANT_TYPE_REFRESH: ${{ secrets.GRANT_TYPE_REFRESH }}
+          GRANT_TYPE_CC: ${{ secrets.GRANT_TYPE_CC }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
@@ -73,16 +76,24 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          envs: FLASK_SECRET_KEY,DB,REDIRECT_URL,TOKEN_URL,GRANT_TYPE,CLIENT_ID,CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH
+          envs: |
+            FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL,TOKEN_URL,\
+            GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,CLIENT_ID,\
+            CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH
           script: |
             cd ~/$PROJECT_PATH && \
             echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > .env && \
-            echo "DB=$DB" >> .env && \
             echo "REDIRECT_URL=$REDIRECT_URL" >> .env && \
+            echo "HH_BASE_URL=$HH_BASE_URL" >> .env && \
+            echo "REG_URL=$REG_URL" >> .env && \
             echo "TOKEN_URL=$TOKEN_URL" >> .env && \
-            echo "GRANT_TYPE=$GRANT_TYPE" >> .env && \
+            echo "GRANT_TYPE_CODE=$GRANT_TYPE_CODE" >> .env && \
+            echo "GRANT_TYPE_REFRESH=$GRANT_TYPE_REFRESH" >> .env && \
+            echo "GRANT_TYPE_CC=$GRANT_TYPE_CC" >> .env && \
             echo "CLIENT_ID=$CLIENT_ID" >> .env && \
             echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env && \
+            echo "USER_PASSWORD=$USER_PASSWORD" >> .env && \
+            echo "PROJECT_PATH=$PROJECT_PATH" >> .env
             echo $USER_PASSWORD | sudo -S docker-compose pull
             echo $USER_PASSWORD | sudo -S docker-compose up -d
 
