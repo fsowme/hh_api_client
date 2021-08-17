@@ -34,7 +34,7 @@ def oauth():
         return {"error": "Password expired"}
     except LoginNotVerified:
         return {"error": "Acoount isn't verified"}
-    user_info = HH_REQUESTER.get_user_info(token)
+    user_info = HH_REQUESTER.get_user_info(token.access_token)
     user_email = user_info["email"]
     USER_MANAGER.update_or_create(email=user_email, defaults=token.__dict__)
     return {

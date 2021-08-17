@@ -6,22 +6,21 @@ from requests import Response
 from .config import Config
 from .errors import (
     AUTH_ERRORS_CONST,
-    GetTokenError,
-    OAuthError,
     TOKEN_ERRORS_CONST,
+    GetTokenError,
     InvalidResponseError,
+    OAuthError,
     ServiceUnavailableError,
     UnknownError,
 )
-from .tokens import UserToken
 
 
 class HHRequester:
     base_url = Config.HH_BASE_URL
 
-    def get_user_info(self, token: UserToken) -> dict:
+    def get_user_info(self, access_token: str) -> dict:
         url = self.base_url + "/me"
-        headers = {"Authorization": f"Bearer {token.access_token}"}
+        headers = {"Authorization": f"Bearer {access_token}"}
         response = requests.get(url, headers=headers)
         response_validator = HHAnswerValidator(response)
         response_data = response_validator.user_info_response_validation()
