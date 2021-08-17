@@ -2,7 +2,7 @@ from typing import Any, Tuple
 
 from sqlalchemy.orm.query import Query
 
-from .models import db
+from web.models import db
 
 
 class DBManager:

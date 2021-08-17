@@ -1,5 +1,5 @@
 import os
-
+from telegram.ext import PicklePersistence
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,6 +8,10 @@ basedir = os.path.abspath(os.getcwd())
 
 
 class Config:
+    pass
+
+
+class FlaskConfig(Config):
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = (
         os.getenv("DB") or f"sqlite:///{os.path.join(basedir, 'sqlite.db')}"
@@ -24,3 +28,8 @@ class Config:
     CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
     REG_URL = os.getenv("REG_URL")
+
+
+class BotConfig(Config):
+    TOKEN = os.getenv("TG_TOKEN")
+    PERSISTENCE = PicklePersistence(os.getenv("PERSISTENCE")) or "persist.bin"
