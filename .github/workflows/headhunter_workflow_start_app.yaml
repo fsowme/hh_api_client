@@ -77,8 +77,8 @@ jobs:
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           envs: |
-            FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL,TOKEN_URL,\
-            GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,CLIENT_ID,\
+            FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL,TOKEN_URL,
+            GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,CLIENT_ID,
             CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH
           script: |
             cd ~/$PROJECT_PATH && \
