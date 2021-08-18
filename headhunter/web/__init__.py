@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 
-from config import BotConfig, FlaskConfig
+from config import FlaskConfig
 from web import views
 from web.models import db
 
