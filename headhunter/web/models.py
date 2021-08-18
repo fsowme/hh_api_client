@@ -10,3 +10,4 @@ class User(db.Model):
     access_token = db.Column(db.String(100), unique=True, nullable=False)
     refresh_token = db.Column(db.String(100), unique=True, nullable=False)
     expire_at = db.Column(db.Integer, nullable=False)
+    telegram_id = db.Column(db.Integer, unique=True)
