@@ -4,7 +4,7 @@ import requests
 from requests import Response
 
 from config import FlaskConfig
-from web.errors import (
+from utils.errors import (
     AUTH_ERRORS_CONST,
     TOKEN_ERRORS_CONST,
     GetTokenError,

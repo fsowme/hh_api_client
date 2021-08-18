@@ -3,8 +3,8 @@ import time
 import requests
 
 from config import FlaskConfig
-from web.errors import TokenValidationError
-from web.hh_requests import HHAnswerValidator
+from utils.errors import TokenValidationError
+from utils.hh_requests import HHAnswerValidator
 
 
 class UserToken:

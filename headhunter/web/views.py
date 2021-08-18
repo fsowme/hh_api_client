@@ -4,24 +4,15 @@ from flask import redirect, request
 from telegram import Update
 from werkzeug.exceptions import BadRequest
 
+import utils.errors as errors
 from bot import BOT, DISPATCHER
 from config import FlaskConfig
-from web.db_manager import DBManager
-from web.errors import (
-    AccountIsLocked,
-    CodeExpired,
-    ForbiddenError,
-    GetTokenError,
-    LoginNotVerified,
-    OAuthError,
-    PasswordInvalidated,
-    TokenWasRevoked,
-)
-from web.hh_requests import HHRequester
-from web.models import User
-from web.tokens import UserToken
+from utils.db_manager import DBManager
+from utils.hh_requests import HHRequester
+from utils.tokens import UserToken
+from web.models import User, db
 
-USER_MANAGER = DBManager(User)
+USER_MANAGER = DBManager(User, db)
 HH_REQUESTER = HHRequester()
 
 
@@ -41,24 +32,24 @@ def oauth():
         return redirect(hh_auth_url)
     try:
         token = UserToken.get_user_token(code)
-    except AccountIsLocked:
+    except errors.AccountIsLocked:
         return {"error": "Account is locked"}
-    except PasswordInvalidated:
+    except errors.PasswordInvalidated:
         return {"error": "Password expired"}
-    except LoginNotVerified:
+    except errors.LoginNotVerified:
         return {"error": "Acoount isn't verified"}
-    except TokenWasRevoked:
+    except errors.TokenWasRevoked:
         return {"error": "Token was revoked"}
-    except CodeExpired:
+    except errors.CodeExpired:
         return {"error": "authorization_code expired"}
-    except ForbiddenError:
+    except errors.ForbiddenError:
         return {"error": "Too many requests, try again later"}
-    except GetTokenError:
+    except errors.GetTokenError:
         # TODO: log it
         return {"error": "Internal server error"}
     try:
         user_info = HH_REQUESTER.get_user_info(token.access_token)
-    except OAuthError:
+    except errors.OAuthError:
         # TODO: log it
         return {"error": "Authorization error"}
     if not (user_email := user_info.get("email")):

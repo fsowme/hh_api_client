@@ -1,8 +1,7 @@
 from typing import Any, Tuple
 
+from flask_sqlalchemy import Model, SQLAlchemy
 from sqlalchemy.orm.query import Query
-
-from web.models import db
 
 
 class DBManager:
@@ -15,11 +14,11 @@ class DBManager:
 
     query = DescQuery()
 
-    def __init__(self, model: db.Model) -> None:
+    def __init__(self, model: Model, db: SQLAlchemy) -> None:
         self.model = model
         self.session = db.session
 
-    def commit(self, instance: db.Model) -> db.Model:
+    def commit(self, instance: Model) -> Model:
         try:
             self.session.add(instance)
             self.session.commit()
@@ -28,14 +27,14 @@ class DBManager:
             raise error
         return instance
 
-    def create(self, **kwargs) -> db.Model:
+    def create(self, **kwargs) -> Model:
         new_instance = self.model(**kwargs)
         saved_instance = self.commit(new_instance)
         return saved_instance
 
     def get_or_create(
         self, defaults: dict = None, **kwargs
-    ) -> Tuple[db.Model, bool]:
+    ) -> Tuple[Model, bool]:
         if instance := self.query.filter_by(**kwargs).one_or_none():
             return instance, False
         object_fields = kwargs | defaults or {}
@@ -44,7 +43,7 @@ class DBManager:
 
     def update_or_create(
         self, defaults: dict = None, **kwargs
-    ) -> Tuple[db.Model, bool]:
+    ) -> Tuple[Model, bool]:
         defaults = {} if defaults is None else defaults
         if instance := self.query.filter_by(**kwargs).one_or_none():
             for field, value in defaults.items():
