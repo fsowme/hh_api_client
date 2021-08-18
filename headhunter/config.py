@@ -13,9 +13,18 @@ class Config:
 
 class FlaskConfig(Config):
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    POSTGRES_USER = os.getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+    POSTGRES_DB = os.getenv("POSTGRES_DB")
     SQLALCHEMY_DATABASE_URI = (
-        os.getenv("DB") or f"sqlite:///{os.path.join(basedir, 'sqlite.db')}"
+        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+        f"@{DB_HOST}:{DB_PORT}/{POSTGRES_DB}"
     )
+    # SQLALCHEMY_DATABASE_URI = (
+    #     os.getenv("DB") or f"sqlite:///{os.path.join(basedir, 'sqlite.db')}"
+    # )
     JSON_AS_ASCII = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REDIRECT_URL = os.getenv("REDIRECT_URL")

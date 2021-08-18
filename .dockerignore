@@ -10,3 +10,5 @@ persist.bin
 docker-compose.yaml
 Dockerfile
 nginx.conf
+
+local_compose.yaml
