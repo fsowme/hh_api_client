@@ -50,11 +50,7 @@ def oauth():
     except Exception:
         # TODO: log it
         return {"error": "Internal server error"}
-    return {
-        "at": token.access_token,
-        "rt": token.refresh_token,
-        "ea": token.expire_at,
-    }
+    return "Ok"
 
 
 def webhook():
