@@ -5,8 +5,9 @@ from requests import Response
 
 from config import FlaskConfig
 from utils.errors import (
-    AUTH_ERRORS_CONST,
-    TOKEN_ERRORS_CONST,
+    AUTH_ERR,
+    TOKEN_ERR,
+    TOKEN_ERR_DETAIL,
     GetTokenError,
     InvalidResponseError,
     OAuthError,
@@ -40,15 +41,13 @@ class HHAnswerValidator:
         return response_data
 
     def token_response_validation(self):
-        response_data = self._get_json()
+        hh_reply = self._get_json()
         if self.hh_response.status_code == 200:
-            return response_data
+            return hh_reply
         if self.hh_response.status_code in (400, 403):
-            hh_api_error = response_data.get("error")
-            if error_type := TOKEN_ERRORS_CONST.get(hh_api_error):
-                if error_text := response_data.get("error_description"):
-                    raise error_type(error_text)
-                raise error_type(hh_api_error)
+            error = hh_reply.get("error_description") or hh_reply.get("error")
+            if exc := (TOKEN_ERR.get(error) or TOKEN_ERR_DETAIL.get(error)):
+                raise exc()
             raise GetTokenError("Unknow error from hh api")
         if self.hh_response.status_code == 503:
             raise ServiceUnavailableError("HH service is unavailable")
@@ -59,9 +58,9 @@ class HHAnswerValidator:
         if self.hh_response.status_code == 200:
             return response_data
         if self.hh_response.status_code == 403:
-            hh_api_error = response_data.get("value")
-            if error_type := AUTH_ERRORS_CONST.get(hh_api_error):
-                raise error_type(hh_api_error)
+            error = response_data.get("value")
+            if exc := AUTH_ERR.get(error):
+                raise exc()
             raise OAuthError
         if self.hh_response.status_code == 503:
             raise ServiceUnavailableError("HH service is unavailable")

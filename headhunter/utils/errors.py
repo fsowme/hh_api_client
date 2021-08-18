@@ -1,4 +1,7 @@
 # fmt: off
+from typing import Dict
+
+
 class ValidationError(Exception): ...
 
 # Token exceptions
@@ -56,7 +59,7 @@ class CommitError(DBManagerError): ...
 # fmt: on
 
 
-TOKEN_ERRORS_CONST = {
+TOKEN_ERR: Dict[str, GetTokenError] = {
     "invalid_request": InvalidRequestError,
     "invalid_client": InvalidClientError,
     "invalid_grant": InvalidGrantError,
@@ -64,7 +67,27 @@ TOKEN_ERRORS_CONST = {
     "forbidden": ForbiddenError,
 }
 
-AUTH_ERRORS_CONST = {
+TOKEN_ERR_DETAIL: Dict[str, GetTokenError] = {
+    "account not found": AccountNotFound,
+    "account is locked": AccountIsLocked,
+    "password invalidated": PasswordInvalidated,
+    "login not verified": LoginNotVerified,
+    "bad redirect url": BadRedirectUrl,
+    "token is empty": TokenIsEmpty,
+    "token not found": TokenNotFound,
+    "code not found": CodeNotFound,
+    "token has already been refreshed": TokenAlreadyRefreshed,
+    "token not expired": TokenNotExpired,
+    "token was revoked": TokenWasRevoked,
+    "bad token": BadToken,
+    "code has already been used": CodeAlreadyUsed,
+    "code expired": CodeExpired,
+    "code was revoke": CodeRevoked,
+    "token deactivated": TokenDeactivated,
+}
+
+
+AUTH_ERR: Dict[str, OAuthError] = {
     "bad_authorization": NotValidToken,
     "token_expired": TokenExpired,
     "token_revoked": TokenRevoked,

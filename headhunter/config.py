@@ -8,7 +8,9 @@ basedir = os.path.abspath(os.getcwd())
 
 
 class Config:
-    pass
+    CLIENT_ID = os.getenv("CLIENT_ID")
+    REDIRECT_URL = os.getenv("REDIRECT_URL")
+    REG_URL = os.getenv("REG_URL")
 
 
 class FlaskConfig(Config):
@@ -18,16 +20,13 @@ class FlaskConfig(Config):
     )
     JSON_AS_ASCII = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    REDIRECT_URL = os.getenv("REDIRECT_URL")
     # hh.ru
     HH_BASE_URL = os.getenv("HH_BASE_URL")
     TOKEN_URL = os.getenv("TOKEN_URL")
     GRANT_TYPE_CODE = os.getenv("GRANT_TYPE_CODE")
     GRANT_TYPE_REFRESH = os.getenv("GRANT_TYPE_REFRESH")
     GRANT_TYPE_CC = os.getenv("GRANT_TYPE_CC")
-    CLIENT_ID = os.getenv("CLIENT_ID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-    REG_URL = os.getenv("REG_URL")
 
 
 class BotConfig(Config):
