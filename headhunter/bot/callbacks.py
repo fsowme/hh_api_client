@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 
 from config import BotConfig
-from web import hh_requester, user_manager
+from web import user_manager
 
 
 def start(update: Update, context: CallbackContext):
