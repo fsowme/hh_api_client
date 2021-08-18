@@ -12,12 +12,14 @@ def test():
     return {"test": True}
 
 
-@app.route("/oauth/", methods=["GET", "POST"])
 def oauth():
     if not (code := request.args.get("code")):
         return {"error": "The requested url must contain authorization code"}
+    if not (telegram_id := request.args.get("telegram_id")):
+        return {"error": "Invalid telegram id"}
+    rdr_uri_args = {"telegram_id": telegram_id}
     try:
-        token = UserToken.get_user_token(code)
+        token = UserToken.get_user_token(code, rdr_uri_args)
     except errors.CodeNotFound:
         return {"error": "Invalid authorization code"}
     except errors.AccountIsLocked:
@@ -42,9 +44,9 @@ def oauth():
         return {"error": "Authorization error"}
     if not (user_email := user_info.get("email")):
         return {"error": "User doesn't have email"}
-    token_fields = token.__dict__
+    user_fields = token.__dict__ | {"telegram_id": telegram_id}
     try:
-        user_manager.update_or_create(email=user_email, defaults=token_fields)
+        user_manager.update_or_create(email=user_email, defaults=user_fields)
     except Exception:
         # TODO: log it
         return {"error": "Internal server error"}

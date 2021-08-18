@@ -32,6 +32,9 @@ class DBManager:
         saved_instance = self.commit(new_instance)
         return saved_instance
 
+    def get(self, **kwargs) -> Model:
+        return self.query.filter_by(**kwargs).one_or_none()
+
     def get_or_create(
         self, defaults: dict = None, **kwargs
     ) -> Tuple[Model, bool]:

@@ -1,4 +1,5 @@
 import time
+from urllib.parse import urlencode
 
 import requests
 
@@ -30,12 +31,14 @@ class UserToken:
         return True
 
     @classmethod
-    def get_user_token(cls, code: str) -> "UserToken":
+    def get_user_token(cls, code: str, rdr_args: dict = None) -> "UserToken":
+        redirect_uri = FlaskConfig.REDIRECT_URL
+        redirect_uri += "" if rdr_args is None else f"?{urlencode(rdr_args)}"
         data = {
             "grant_type": FlaskConfig.GRANT_TYPE_CODE,
             "client_id": FlaskConfig.CLIENT_ID,
             "client_secret": FlaskConfig.CLIENT_SECRET,
-            "redirect_uri": FlaskConfig.REDIRECT_URL,
+            "redirect_uri": redirect_uri,
             "code": code,
         }
         response = requests.post(url=FlaskConfig.TOKEN_URL, data=data)
