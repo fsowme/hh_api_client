@@ -32,4 +32,4 @@ class FlaskConfig(Config):
 class BotConfig(Config):
     TOKEN = os.getenv("TG_TOKEN")
     PERSISTENCE = PicklePersistence(os.getenv("PERSISTENCE")) or "persist.bin"
-    MAIN_KEYBOARD = [["Отклики"], ["Вакансии"], [], [], []]
+    MAIN_KEYBOARD = [["Отклики"], ["Вакансии"], ["..."], ["..."], ["..."]]

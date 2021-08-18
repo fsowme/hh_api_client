@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-from telegram import Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 
 from config import BotConfig
@@ -24,4 +24,5 @@ def start(update: Update, context: CallbackContext):
     }
     params = urlencode(params)
     hh_auth_url = f"{BotConfig.REG_URL}?{params}"
-    update.message.reply_text(text.format(hh_auth_url))
+    markup = ReplyKeyboardMarkup(BotConfig.MAIN_KEYBOARD)
+    update.message.reply_text(text.format(hh_auth_url), reply_markup=markup)
