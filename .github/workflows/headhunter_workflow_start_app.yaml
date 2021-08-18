@@ -71,12 +71,12 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
           PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
-
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -85,9 +85,8 @@ jobs:
           envs: |
             FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL,TOKEN_URL,
             GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,CLIENT_ID,
-            CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH,
-            DB_HOST,DB_PORT,
-            POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB
+            CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH,DB_HOST,DB_PORT,
+            POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,TG_TOKEN
           script: |
             cd ~/$PROJECT_PATH && \
             echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > .env && \
@@ -106,6 +105,7 @@ jobs:
             echo "POSTGRES_USER=$POSTGRES_USER" >> .env && \
             echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env && \
             echo "POSTGRES_DB=$POSTGRES_DB" >> .env && \
+            echo "TG_TOKEN=$TG_TOKEN" >> .env && \
             echo "PROJECT_PATH=$PROJECT_PATH" >> .env
             echo $USER_PASSWORD | sudo -S docker-compose pull
             echo $USER_PASSWORD | sudo -S docker-compose up -d
