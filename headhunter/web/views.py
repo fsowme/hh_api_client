@@ -1,19 +1,11 @@
-from urllib.parse import urlencode
-
-from flask import redirect, request
+from flask import request
 from telegram import Update
 from werkzeug.exceptions import BadRequest
 
-import utils.errors as errors
 from bot import BOT, DISPATCHER
-from config import FlaskConfig
-from utils.db_manager import DBManager
-from utils.hh_requests import HHRequester
+from utils import errors
 from utils.tokens import UserToken
-from web.models import User, db
-
-USER_MANAGER = DBManager(User, db)
-HH_REQUESTER = HHRequester()
+from web import app, hh_requester, user_manager
 
 
 def test():
@@ -22,16 +14,14 @@ def test():
 
 def oauth():
     if not (code := request.args.get("code")):
-        params = {
-            "response_type": "code",
-            "client_id": FlaskConfig.CLIENT_ID,
-            "redirect_uri": FlaskConfig.REDIRECT_URL,
-        }
-        params = str(urlencode(params))
-        hh_auth_url = "".join([FlaskConfig.REG_URL, "?", params])
-        return redirect(hh_auth_url)
+        return {"error": "The requested url must contain authorization code"}
+    if not (telegram_id := request.args.get("telegram_id")):
+        return {"error": "Invalid telegram id"}
+    rdr_uri_args = {"telegram_id": telegram_id}
     try:
-        token = UserToken.get_user_token(code)
+        token = UserToken.get_user_token(code, rdr_uri_args)
+    except errors.CodeNotFound:
+        return {"error": "Invalid authorization code"}
     except errors.AccountIsLocked:
         return {"error": "Account is locked"}
     except errors.PasswordInvalidated:
@@ -48,15 +38,15 @@ def oauth():
         # TODO: log it
         return {"error": "Internal server error"}
     try:
-        user_info = HH_REQUESTER.get_user_info(token.access_token)
+        user_info = hh_requester.get_user_info(token.access_token)
     except errors.OAuthError:
         # TODO: log it
         return {"error": "Authorization error"}
     if not (user_email := user_info.get("email")):
         return {"error": "User doesn't have email"}
-    token_fields = token.__dict__
+    user_fields = token.__dict__ | {"telegram_id": telegram_id}
     try:
-        USER_MANAGER.update_or_create(email=user_email, defaults=token_fields)
+        user_manager.update_or_create(email=user_email, defaults=user_fields)
     except Exception:
         # TODO: log it
         return {"error": "Internal server error"}
@@ -76,3 +66,9 @@ def webhook():
     telegram_update = Update.de_json(request_data, BOT)
     DISPATCHER.process_update(telegram_update)
     return "Ok"
+
+
+app.add_url_rule("/", view_func=test)
+app.add_url_rule("/oauth/", view_func=oauth)
+app.add_url_rule("/webhook/", view_func=webhook, methods=["GET", "POST"])
+# app.add_url_rule(f"/{BotConfig.TOKEN}/webhook", view_func=views.webhook)

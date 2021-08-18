@@ -2,14 +2,15 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from config import FlaskConfig
-from web import views
-from web.models import db
+from utils.db_manager import DBManager
+from utils.hh_requests import HHRequester
+from web.models import User, db
+
 
 app = Flask(__name__)
 app.config.from_object(FlaskConfig)
 db.init_app(app)
 migrate = Migrate(app, db)
-app.add_url_rule("/", view_func=views.test)
-app.add_url_rule("/oauth/", view_func=views.oauth)
-app.add_url_rule("/webhook/", view_func=views.webhook, methods=["GET", "POST"])
-# app.add_url_rule(f"/{BotConfig.TOKEN}/webhook", view_func=views.webhook)
+
+user_manager = DBManager(User, db)
+hh_requester = HHRequester()
