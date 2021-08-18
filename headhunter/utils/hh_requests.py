@@ -3,8 +3,8 @@ from json.decoder import JSONDecodeError
 import requests
 from requests import Response
 
-from .config import Config
-from .errors import (
+from config import FlaskConfig
+from utils.errors import (
     AUTH_ERRORS_CONST,
     TOKEN_ERRORS_CONST,
     GetTokenError,
@@ -16,7 +16,7 @@ from .errors import (
 
 
 class HHRequester:
-    base_url = Config.HH_BASE_URL
+    base_url = FlaskConfig.HH_BASE_URL
 
     def get_user_info(self, access_token: str) -> dict:
         url = self.base_url + "/me"

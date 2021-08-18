@@ -1,13 +1,15 @@
 from flask import Flask
 from flask_migrate import Migrate
 
-from . import views
-from .config import Config
-from .models import db
+from config import BotConfig, FlaskConfig
+from web import views
+from web.models import db
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(FlaskConfig)
 db.init_app(app)
 migrate = Migrate(app, db, render_as_batch=True)
 app.add_url_rule("/", view_func=views.test)
-app.add_url_rule("/oauth", view_func=views.oauth)
+app.add_url_rule("/oauth/", view_func=views.oauth)
+app.add_url_rule("/webhook/", view_func=views.webhook, methods=["GET", "POST"])
+# app.add_url_rule(f"/{BotConfig.TOKEN}/webhook", view_func=views.webhook)

@@ -96,4 +96,3 @@ jobs:
             echo "PROJECT_PATH=$PROJECT_PATH" >> .env
             echo $USER_PASSWORD | sudo -S docker-compose pull
             echo $USER_PASSWORD | sudo -S docker-compose up -d
-

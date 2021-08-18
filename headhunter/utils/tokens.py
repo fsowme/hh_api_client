@@ -2,9 +2,9 @@ import time
 
 import requests
 
-from .config import Config
-from .errors import TokenValidationError
-from .hh_requests import HHAnswerValidator
+from config import FlaskConfig
+from utils.errors import TokenValidationError
+from utils.hh_requests import HHAnswerValidator
 
 
 class UserToken:
@@ -19,10 +19,10 @@ class UserToken:
         if self.expire_at < time.time() and not force:
             return False
         data = {
-            "grant_type": Config.GRANT_TYPE_REFRESH,
+            "grant_type": FlaskConfig.GRANT_TYPE_REFRESH,
             "refresh_token": self.refresh_token,
         }
-        response = requests.post(url=Config.TOKEN_URL, data=data)
+        response = requests.post(url=FlaskConfig.TOKEN_URL, data=data)
         response_validator = HHAnswerValidator(response)
         response_data = response_validator.token_response_validation()
         valid_token_data = self.validate_hh_token(response_data)
@@ -32,13 +32,13 @@ class UserToken:
     @classmethod
     def get_user_token(cls, code: str) -> "UserToken":
         data = {
-            "grant_type": Config.GRANT_TYPE_CODE,
-            "client_id": Config.CLIENT_ID,
-            "client_secret": Config.CLIENT_SECRET,
-            "redirect_uri": Config.REDIRECT_URL,
+            "grant_type": FlaskConfig.GRANT_TYPE_CODE,
+            "client_id": FlaskConfig.CLIENT_ID,
+            "client_secret": FlaskConfig.CLIENT_SECRET,
+            "redirect_uri": FlaskConfig.REDIRECT_URL,
             "code": code,
         }
-        response = requests.post(url=Config.TOKEN_URL, data=data)
+        response = requests.post(url=FlaskConfig.TOKEN_URL, data=data)
         now = int(time.time())
         response_validator = HHAnswerValidator(response)
         response_data = response_validator.token_response_validation()

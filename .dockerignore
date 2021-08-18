@@ -3,8 +3,10 @@ __pycache__
 .vscode
 .env
 .idea
+*.db
+persist.bin
+
+.github
 docker-compose.yaml
 Dockerfile
 nginx.conf
-.github
-*.db
