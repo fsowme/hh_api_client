@@ -16,7 +16,7 @@ def start(update: Update, context: CallbackContext):
             f" на почту: '{user.email}', если хотите привязать другой аккаунт,"
             " то перейдите по ссылке:\n\n{}\n"
         )
-    redirect_uri = f"{BotConfig.REDIRECT_URL}?telegram_id={telegram_id}"
+    redirect_uri = f"{BotConfig.REDIRECT_URI}?telegram_id={telegram_id}"
     params = {
         "response_type": "code",
         "client_id": BotConfig.CLIENT_ID,

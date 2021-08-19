@@ -1,11 +1,7 @@
 import time
-from urllib.parse import urlencode
 
-import requests
-
-from config import FlaskConfig
 from utils.errors import TokenValidationError
-from utils.hh_requests import HHAnswerValidator
+from web import hh_requester
 
 
 class UserToken:
@@ -15,37 +11,21 @@ class UserToken:
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.expire_at = expire_at
+        self._is_valid = None
 
     def update_token(self, force=False) -> bool:
         if self.expire_at < time.time() and not force:
             return False
-        data = {
-            "grant_type": FlaskConfig.GRANT_TYPE_REFRESH,
-            "refresh_token": self.refresh_token,
-        }
-        response = requests.post(url=FlaskConfig.TOKEN_URL, data=data)
-        response_validator = HHAnswerValidator(response)
-        response_data = response_validator.token_response_validation()
-        valid_token_data = self.validate_hh_token(response_data)
+        token_data = hh_requester.update_token(self.refresh_token)
+        now = int(time.time())
+        valid_token_data = self.validate_hh_token(token_data, now)
         self.__init__(**valid_token_data)
         return True
 
     @classmethod
-    def get_user_token(cls, code: str, rdr_args: dict = None) -> "UserToken":
-        redirect_uri = FlaskConfig.REDIRECT_URL
-        redirect_uri += "" if rdr_args is None else f"?{urlencode(rdr_args)}"
-        data = {
-            "grant_type": FlaskConfig.GRANT_TYPE_CODE,
-            "client_id": FlaskConfig.CLIENT_ID,
-            "client_secret": FlaskConfig.CLIENT_SECRET,
-            "redirect_uri": redirect_uri,
-            "code": code,
-        }
-        response = requests.post(url=FlaskConfig.TOKEN_URL, data=data)
+    def token_from_dict(cls, token_data: dict):
         now = int(time.time())
-        response_validator = HHAnswerValidator(response)
-        response_data = response_validator.token_response_validation()
-        valid_token_data = cls.validate_hh_token(response_data, now)
+        valid_token_data = cls.validate_hh_token(token_data, now)
         return cls(**valid_token_data)
 
     @staticmethod

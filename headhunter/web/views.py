@@ -3,7 +3,7 @@ from telegram import Update
 from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
-from utils import errors
+from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
 from web import app, hh_requester, user_manager
 
@@ -18,33 +18,27 @@ def oauth():
     if not (telegram_id := request.args.get("telegram_id")):
         return {"error": "Invalid telegram id"}
     rdr_uri_args = {"telegram_id": telegram_id}
+    token_hh_response = hh_requester.get_user_token(code, rdr_uri_args)
+    if not token_hh_response.is_valid:
+        return {"error": token_hh_response.msg}
     try:
-        token = UserToken.get_user_token(code, rdr_uri_args)
-    except errors.CodeNotFound:
-        return {"error": "Invalid authorization code"}
-    except errors.AccountIsLocked:
-        return {"error": "Account is locked"}
-    except errors.PasswordInvalidated:
-        return {"error": "Password expired"}
-    except errors.LoginNotVerified:
-        return {"error": "Acoount isn't verified"}
-    except errors.TokenWasRevoked:
-        return {"error": "Token was revoked"}
-    except errors.CodeExpired:
-        return {"error": "authorization_code expired"}
-    except errors.ForbiddenError:
-        return {"error": "Too many requests, try again later"}
-    except errors.GetTokenError:
+        token = UserToken.token_from_dict(token_hh_response.cleaned_data)
+    except TokenValidationError as error:
         # TODO: log it
-        return {"error": "Internal server error"}
-    try:
-        user_info = hh_requester.get_user_info(token.access_token)
-    except errors.OAuthError:
-        # TODO: log it
-        return {"error": "Authorization error"}
-    if not (user_email := user_info.get("email")):
+        msg = error.error_text if error.for_user else UnknownError.error_text
+        return {"error": msg}
+    user_hh_response = hh_requester.get_user_info(token.access_token)
+    if not user_hh_response.is_valid:
+        return {"error": user_hh_response.msg}
+
+    if not (user_email := user_hh_response.cleaned_data.get("email")):
         return {"error": "User doesn't have email"}
-    user_fields = token.__dict__ | {"telegram_id": telegram_id}
+    user_fields = {
+        "telegram_id": telegram_id,
+        "access_token": token.access_token,
+        "refresh_token": token.refresh_token,
+        "expire_at": token.expire_at,
+    }
     try:
         user_manager.update_or_create(email=user_email, defaults=user_fields)
     except Exception:

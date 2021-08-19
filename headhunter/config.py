@@ -9,7 +9,7 @@ basedir = os.path.abspath(os.getcwd())
 
 class Config:
     CLIENT_ID = os.getenv("CLIENT_ID")
-    REDIRECT_URL = os.getenv("REDIRECT_URL")
+    REDIRECT_URI = os.getenv("REDIRECT_URL")
     REG_URL = os.getenv("REG_URL")
 
 
