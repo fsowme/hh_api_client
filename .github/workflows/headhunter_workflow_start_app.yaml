@@ -78,6 +78,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          AUTOSEARCHES_PATH: ${{ secrets.AUTOSEARCHES_PATH }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -88,7 +89,7 @@ jobs:
             TOKEN_URL_PATH,GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,
             CLIENT_ID,CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH,DB_HOST,
             DB_PORT,POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,TG_TOKEN,
-            HH_BASE_API_URL
+            HH_BASE_API_URL,AUTOSEARCHES_PATH
           script: |
             cd ~/$PROJECT_PATH && \
             echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > .env && \
@@ -109,6 +110,7 @@ jobs:
             echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env && \
             echo "POSTGRES_DB=$POSTGRES_DB" >> .env && \
             echo "TG_TOKEN=$TG_TOKEN" >> .env && \
+            echo "AUTOSEARCHES_PATH=$AUTOSEARCHES_PATH" >> .env && \
             echo "PROJECT_PATH=$PROJECT_PATH" >> .env
             echo $USER_PASSWORD | sudo -S docker-compose pull
             echo $USER_PASSWORD | sudo -S docker-compose up -d
