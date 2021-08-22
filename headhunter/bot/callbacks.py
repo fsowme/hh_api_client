@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 
+from bot.constants import Keyboards, States
 from config import BotConfig
 from web import user_manager
 
@@ -24,5 +25,29 @@ def start(update: Update, context: CallbackContext):
     }
     params = urlencode(params)
     hh_auth_url = f"{BotConfig.REG_URL}?{params}"
-    markup = ReplyKeyboardMarkup(BotConfig.MAIN_KEYBOARD)
+    markup = ReplyKeyboardMarkup(Keyboards.MAIN_KEYBOARD)
     update.message.reply_text(text.format(hh_auth_url), reply_markup=markup)
+    return States.MAIN_PAGE
+
+
+def account_settings(update: Update, context: CallbackContext):
+    markup = ReplyKeyboardMarkup(Keyboards.ACCOUNT_SETTINGS)
+    update.message.reply_text(
+        "Вы в меню настроки аккаунта, выберите действие", reply_markup=markup
+    )
+    return States.ACCOUNT_SETTINGS
+
+
+def autosearches(update: Update, context: CallbackContext):
+    markup = ReplyKeyboardMarkup(Keyboards.SAVED_SEARCHES)
+    text = "Тут можно посмотреть, изменить или удалить автопоиски"
+    update.message.reply_text(text, reply_markup=markup)
+    return States.AUTOSEARCHES
+
+
+def autosearches_action(update: Update, context: CallbackContext):
+    text = f"Action: {update.message.text}"
+    if update.message.text == Keyboards.BACK_TEXT:
+        return account_settings(update, None)
+    update.message.reply_text(text)
+    return States.AUTOSEARCHES
