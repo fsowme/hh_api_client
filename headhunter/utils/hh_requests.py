@@ -126,9 +126,6 @@ class HHRequester:
         validator = HHReplyTokenValidator(response)
         return HHResponse(validator)
 
-    def get_data(self, access_token: str, url: str) -> Response:
-        response = requests.get()
-
     def get_user_info(self, access_token: str) -> HHResponse:
         url = self.api_base_url + "/me"
         headers = {"Authorization": f"Bearer {access_token}"}

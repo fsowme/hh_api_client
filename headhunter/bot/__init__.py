@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from telegram.ext import Updater
 
 from config import BotConfig
-from bot.handlers import start_handler, main_conversation
+from bot.handlers import main_conversation
 
 load_dotenv()
 
