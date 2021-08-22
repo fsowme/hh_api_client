@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
 from bot.callbacks import hello
+from config import BotConfig
 from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
 from web import app, hh_requester, user_manager
@@ -62,5 +63,6 @@ def webhook():
 
 app.add_url_rule("/", view_func=test)
 app.add_url_rule("/oauth/", view_func=oauth)
-app.add_url_rule("/webhook/", view_func=webhook, methods=["GET", "POST"])
-# app.add_url_rule(f"/{BotConfig.TOKEN}/webhook", view_func=views.webhook)
+app.add_url_rule(
+    f"/{BotConfig.TOKEN}/webhook/", view_func=webhook, methods=["GET", "POST"]
+)
