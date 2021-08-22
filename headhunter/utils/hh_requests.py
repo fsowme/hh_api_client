@@ -97,7 +97,8 @@ class HHRequester:
     grant_type_code = FlaskConfig.GRANT_TYPE_CODE
     grant_type_refresh = FlaskConfig.GRANT_TYPE_REFRESH
     base_url = FlaskConfig.HH_BASE_URL
-    token_url = FlaskConfig.TOKEN_URL
+    api_base_url = FlaskConfig.HH_BASE_API_URL
+    token_url_path = FlaskConfig.TOKEN_URL_PATH
     redirect_uri = FlaskConfig.REDIRECT_URI
 
     def get_user_token(self, code: str, rdr_args: dict = None) -> HHResponse:
@@ -110,7 +111,8 @@ class HHRequester:
             "redirect_uri": full_rdr_uri,
             "code": code,
         }
-        response = requests.post(url=self.token_url, data=data)
+        url = "".join([self.base_url, self.token_url_path])
+        response = requests.post(url=url, data=data)
         validator = HHReplyTokenValidator(response)
         return HHResponse(validator)
 
@@ -119,12 +121,16 @@ class HHRequester:
             "grant_type": self.grant_type_refresh,
             "refresh_token": refresh_token,
         }
-        response = requests.post(url=self.token_url, data=data)
+        url = "".join([self.base_url, self.token_url_path])
+        response = requests.post(url=url, data=data)
         validator = HHReplyTokenValidator(response)
         return HHResponse(validator)
 
+    def get_data(self, access_token: str, url: str) -> Response:
+        response = requests.get()
+
     def get_user_info(self, access_token: str) -> HHResponse:
-        url = self.base_url + "/me"
+        url = self.api_base_url + "/me"
         headers = {"Authorization": f"Bearer {access_token}"}
         response = requests.get(url, headers=headers)
         validator = HHReplyUserInfoValidator(response)

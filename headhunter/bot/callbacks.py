@@ -23,6 +23,6 @@ def start(update: Update, context: CallbackContext):
         "redirect_uri": redirect_uri,
     }
     params = urlencode(params)
-    hh_auth_url = f"{BotConfig.REG_URL}?{params}"
+    hh_auth_url = f"{BotConfig.HH_BASE_URL}{BotConfig.REG_URL_PATH}?{params}"
     markup = ReplyKeyboardMarkup(BotConfig.MAIN_KEYBOARD)
     update.message.reply_text(text.format(hh_auth_url), reply_markup=markup)

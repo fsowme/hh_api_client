@@ -1,6 +1,7 @@
 import os
-from telegram.ext import PicklePersistence
+
 from dotenv import load_dotenv
+from telegram.ext import PicklePersistence
 
 load_dotenv()
 
@@ -10,7 +11,9 @@ basedir = os.path.abspath(os.getcwd())
 class Config:
     CLIENT_ID = os.getenv("CLIENT_ID")
     REDIRECT_URI = os.getenv("REDIRECT_URL")
-    REG_URL = os.getenv("REG_URL")
+    HH_BASE_URL = os.getenv("HH_BASE_URL")
+    HH_BASE_API_URL = os.getenv("HH_BASE_API_URL")
+    REG_URL_PATH = os.getenv("REG_URL_PATH")
 
 
 class FlaskConfig(Config):
@@ -30,8 +33,7 @@ class FlaskConfig(Config):
     JSON_AS_ASCII = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # hh.ru
-    HH_BASE_URL = os.getenv("HH_BASE_URL")
-    TOKEN_URL = os.getenv("TOKEN_URL")
+    TOKEN_URL_PATH = os.getenv("TOKEN_URL_PATH")
     GRANT_TYPE_CODE = os.getenv("GRANT_TYPE_CODE")
     GRANT_TYPE_REFRESH = os.getenv("GRANT_TYPE_REFRESH")
     GRANT_TYPE_CC = os.getenv("GRANT_TYPE_CC")
