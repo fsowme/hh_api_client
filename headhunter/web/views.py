@@ -4,10 +4,9 @@ from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
 from bot.callbacks import hello
-from config import BotConfig
 from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
-from web import app, hh_requester, user_manager
+from web import hh_requester, user_manager
 
 
 def test():
