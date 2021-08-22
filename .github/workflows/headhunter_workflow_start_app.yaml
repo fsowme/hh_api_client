@@ -62,8 +62,9 @@ jobs:
           FLASK_SECRET_KEY: ${{ secrets.FLASK_SECRET_KEY }}
           REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
           HH_BASE_URL: ${{ secrets.HH_BASE_URL }}
-          REG_URL: ${{ secrets.REG_URL }}
-          TOKEN_URL: ${{ secrets.TOKEN_URL }}
+          HH_BASE_API_URL: ${{ secrets.HH_BASE_API_URL }}
+          REG_URL_PATH: ${{ secrets.REG_URL_PATH }}
+          TOKEN_URL_PATH: ${{ secrets.TOKEN_URL_PATH }}
           GRANT_TYPE_CODE: ${{ secrets.GRANT_TYPE_CODE }}
           GRANT_TYPE_REFRESH: ${{ secrets.GRANT_TYPE_REFRESH }}
           GRANT_TYPE_CC: ${{ secrets.GRANT_TYPE_CC }}
@@ -83,17 +84,19 @@ jobs:
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           envs: |
-            FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL,TOKEN_URL,
-            GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,CLIENT_ID,
-            CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH,DB_HOST,DB_PORT,
-            POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,TG_TOKEN
+            FLASK_SECRET_KEY,REDIRECT_URL,HH_BASE_URL,REG_URL_PATH,
+            TOKEN_URL_PATH,GRANT_TYPE_CODE,GRANT_TYPE_REFRESH,GRANT_TYPE_CC,
+            CLIENT_ID,CLIENT_SECRET,USER_PASSWORD,PROJECT_PATH,DB_HOST,
+            DB_PORT,POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,TG_TOKEN,
+            HH_BASE_API_URL
           script: |
             cd ~/$PROJECT_PATH && \
             echo "FLASK_SECRET_KEY=$FLASK_SECRET_KEY" > .env && \
             echo "REDIRECT_URL=$REDIRECT_URL" >> .env && \
             echo "HH_BASE_URL=$HH_BASE_URL" >> .env && \
-            echo "REG_URL=$REG_URL" >> .env && \
-            echo "TOKEN_URL=$TOKEN_URL" >> .env && \
+            echo "HH_BASE_API_URL=$HH_BASE_API_URL" >> .env && \
+            echo "REG_URL_PATH=$REG_URL_PATH" >> .env && \
+            echo "TOKEN_URL_PATH=$TOKEN_URL_PATH" >> .env && \
             echo "GRANT_TYPE_CODE=$GRANT_TYPE_CODE" >> .env && \
             echo "GRANT_TYPE_REFRESH=$GRANT_TYPE_REFRESH" >> .env && \
             echo "GRANT_TYPE_CC=$GRANT_TYPE_CC" >> .env && \
