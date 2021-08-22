@@ -100,6 +100,7 @@ class HHRequester:
     api_base_url = FlaskConfig.HH_BASE_API_URL
     token_url_path = FlaskConfig.TOKEN_URL_PATH
     redirect_uri = FlaskConfig.REDIRECT_URI
+    autosearches_path = FlaskConfig.AUTOSEARCHES_PATH
 
     def get_user_token(self, code: str, rdr_args: dict = None) -> HHResponse:
         full_rdr_uri = self.redirect_uri
@@ -128,6 +129,13 @@ class HHRequester:
 
     def get_user_info(self, access_token: str) -> HHResponse:
         url = self.api_base_url + "/me"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(url, headers=headers)
+        validator = HHReplyUserInfoValidator(response)
+        return HHResponse(validator)
+
+    def get_autosearches(self, access_token: str) -> HHResponse:
+        url = self.api_base_url + self.autosearches_path
         headers = {"Authorization": f"Bearer {access_token}"}
         response = requests.get(url, headers=headers)
         validator = HHReplyUserInfoValidator(response)

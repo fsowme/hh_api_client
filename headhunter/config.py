@@ -14,6 +14,7 @@ class Config:
     HH_BASE_URL = os.getenv("HH_BASE_URL")
     HH_BASE_API_URL = os.getenv("HH_BASE_API_URL")
     REG_URL_PATH = os.getenv("REG_URL_PATH")
+    AUTOSEARCHES_PATH = os.getenv("AUTOSEARCHES_PATH")
 
 
 class FlaskConfig(Config):
@@ -43,3 +44,4 @@ class FlaskConfig(Config):
 class BotConfig(Config):
     TOKEN = os.getenv("TG_TOKEN")
     PERSISTENCE = PicklePersistence(os.getenv("PERSISTENCE") or "persist.bin")
+    HELLO_MESSAGE = "Привет, спасибо за регистрацию."

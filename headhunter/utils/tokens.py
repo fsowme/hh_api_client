@@ -1,7 +1,6 @@
 import time
 
 from utils.errors import TokenValidationError
-from web import hh_requester
 
 
 class UserToken:
@@ -12,15 +11,6 @@ class UserToken:
         self.refresh_token = refresh_token
         self.expire_at = expire_at
         self._is_valid = None
-
-    def update_token(self, force=False) -> bool:
-        if self.expire_at < time.time() and not force:
-            return False
-        token_data = hh_requester.update_token(self.refresh_token)
-        now = int(time.time())
-        valid_token_data = self.validate_hh_token(token_data, now)
-        self.__init__(**valid_token_data)
-        return True
 
     @classmethod
     def token_from_dict(cls, token_data: dict):

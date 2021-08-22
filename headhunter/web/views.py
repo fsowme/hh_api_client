@@ -3,6 +3,7 @@ from telegram import Update
 from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
+from bot.callbacks import hello
 from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
 from web import app, hh_requester, user_manager
@@ -44,6 +45,7 @@ def oauth():
     except Exception:
         # TODO: log it
         return {"error": "Internal server error"}
+    hello(BOT, telegram_id)
     return "Ok"
 
 
