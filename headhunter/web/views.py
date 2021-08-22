@@ -59,10 +59,3 @@ def webhook():
     telegram_update = Update.de_json(request_data, BOT)
     DISPATCHER.process_update(telegram_update)
     return "Ok"
-
-
-app.add_url_rule("/", view_func=test)
-app.add_url_rule("/oauth/", view_func=oauth)
-app.add_url_rule(
-    f"/{BotConfig.TOKEN}/webhook/", view_func=webhook, methods=["GET", "POST"]
-)
