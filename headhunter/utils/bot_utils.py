@@ -9,11 +9,65 @@ from web import hh_requester, user_manager
 from web.models import User
 
 
+def get_autosearches(break_function):
+    """
+    Decorator factory
+
+    Get autosearches and put it to context if answer from HH api is valid
+    and data of answer is not empty. Remove autosearches from context after run
+    decorated callback function and before return
+
+    Factory get just one parameter: callback function to be called if
+    answer from api of HH invalid or data of answer is empty.
+
+    Decorated function must have two arguments:
+        1. update: telegram.Update
+        2. context: telegram.ext.CallbackContext
+    """
+
+    def get_autosearches_decorator(callback_function):
+        def wrapper(update: Update, context: CallbackContext):
+            access_token: str = context.user_data["access_token"]
+            autosearch_response = hh_requester.get_autosearches(access_token)
+            if not autosearch_response.is_valid:
+                update.message.reply_text(
+                    "Не удалось получить список автопоисков."
+                )
+                return break_function(update, context)
+            clean_searches = autosearch_response.cleaned_data
+            if clean_searches.get("found") == 0:
+                update.message.reply_text(
+                    "Список сохранённых автопоисков пуст"
+                )
+                return break_function(update, context)
+            context.user_data["autosearches"] = clean_searches
+            wrapped_result = callback_function(update, context)
+            del context.user_data["autosearches"]
+            return wrapped_result
+
+        return wrapper
+
+    return get_autosearches_decorator
+
+
 def check_user(register_function):
+    """
+    Decorator factory
+
+    Check user in db and if user is exist then get and put token to context.
+
+    Factory get just one parameter: callback function to be called if
+    user not exist
+
+    Decorated function must have two arguments:
+        1. update: telegram.Update
+        2. context: telegram.ext.CallbackContext
+    """
+
     def check_user_decorator(callback_function):
-        def wrapper(*args):
-            update: Update = args[0]
-            context: CallbackContext = args[1]
+        """Decorator for Telegram bot callback functions"""
+
+        def wrapper(update: Update, context: CallbackContext):
             telegram_id = update.effective_user.id
             try:
                 if not (user := user_manager.get(telegram_id=telegram_id)):
@@ -29,8 +83,7 @@ def check_user(register_function):
 
 
 def token_to_context(user: User, context: CallbackContext) -> None:
-    now = int(time())
-    if now > user.expire_at:
+    if user.expire_at <= int(time()):
         token_response = hh_requester.update_token(user.refresh_token)
         if not token_response.is_valid:
             raise HHError()

@@ -1,16 +1,17 @@
 from urllib.parse import urlencode
 
-from telegram import ReplyKeyboardMarkup, Update, ReplyKeyboardRemove, Bot
+from telegram import Bot, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext
 
 from bot.constants import Keyboards, States
+from bot.keyboards import autosearches_keyboard
 from config import BotConfig
-from utils.bot_utils import check_user
-from web import user_manager, hh_requester
+from utils.bot_utils import check_user, get_autosearches
+from web import user_manager
 
 
 def hello(bot: Bot, telegram_id):
-    markup = ReplyKeyboardMarkup(Keyboards.MAIN_KEYBOARD)
+    markup = ReplyKeyboardMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
     text = BotConfig.HELLO_MESSAGE
     bot.send_message(text=text, reply_markup=markup, chat_id=telegram_id)
 
@@ -27,7 +28,9 @@ def start(update: Update, context: CallbackContext):
             f" на почту: '{user.email}', если хотите привязать другой аккаунт,"
             " то перейдите по ссылке:\n\n{}\n"
         )
-        markup = ReplyKeyboardMarkup(Keyboards.MAIN_KEYBOARD)
+        markup = ReplyKeyboardMarkup(
+            Keyboards.MAIN_KEYBOARD, resize_keyboard=True
+        )
         state = States.MAIN_PAGE
     redirect_uri = f"{BotConfig.REDIRECT_URI}?telegram_id={telegram_id}"
     params = {
@@ -41,8 +44,11 @@ def start(update: Update, context: CallbackContext):
     return state
 
 
+@check_user(start)
 def account_settings(update: Update, context: CallbackContext):
-    markup = ReplyKeyboardMarkup(Keyboards.ACCOUNT_SETTINGS)
+    markup = ReplyKeyboardMarkup(
+        Keyboards.ACCOUNT_SETTINGS, resize_keyboard=True
+    )
     update.message.reply_text(
         "Вы в меню настроки аккаунта, выберите действие", reply_markup=markup
     )
@@ -51,28 +57,42 @@ def account_settings(update: Update, context: CallbackContext):
 
 @check_user(start)
 def autosearches(update: Update, context: CallbackContext):
-    access_token = context.user_data["access_token"]
-    autosearch_response = hh_requester.get_autosearches(access_token)
-    if not autosearch_response.is_valid:
-        update.message.reply_text("Не удалось получить список автопоисков.")
-        return account_settings(update, None)
-
-    clean_searches = autosearch_response.cleaned_data
-    searches_names = "\n".join(
-        [search["name"] for search in clean_searches["items"]]
+    text = "Тут можно настрить автопоиски\n"
+    markup = ReplyKeyboardMarkup(
+        Keyboards.SAVED_SEARCHES, resize_keyboard=True, one_time_keyboard=True
     )
-    text = (
-        "Тут можно посмотреть, изменить или удалить автопоиски\n"
-        f"{searches_names}"
-    )
-    markup = ReplyKeyboardMarkup(Keyboards.SAVED_SEARCHES)
     update.message.reply_text(text, reply_markup=markup)
     return States.AUTOSEARCHES
 
 
-def autosearches_action(update: Update, context: CallbackContext):
+@check_user(start)
+def add_autosearch(update: Update, context: CallbackContext):
     text = f"Action: {update.message.text}"
-    if update.message.text == Keyboards.BACK_TEXT:
-        return account_settings(update, None)
     update.message.reply_text(text)
     return States.AUTOSEARCHES
+
+
+@check_user(start)
+def change_autosearch(update: Update, context: CallbackContext):
+    return add_autosearch(update, context)
+
+
+@get_autosearches(account_settings)
+@check_user(start)
+def sub_autosearch(update: Update, context: CallbackContext):
+
+    markup = autosearches_keyboard(context.user_data["autosearches"])
+    text = "Подпишись на вакансии найденные автопоиском:"
+    if update.callback_query:
+        # TODO: make unsub from autosearch
+        update.callback_query.message.edit_text(text, reply_markup=markup)
+        update.callback_query.answer()
+        return States.SUB_VACANCIES
+    update.message.reply_text(text, reply_markup=markup)
+    return States.SUB_VACANCIES
+
+
+@check_user(start)
+def sub_autosearch_action(update: Update, context: CallbackContext):
+    print(update.callback_query)
+    return sub_autosearch(update, context)

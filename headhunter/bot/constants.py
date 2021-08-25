@@ -1,5 +1,5 @@
 class Keyboards:
-    BACK_TEXT = "Назад"
+    BACK = "Назад"
     MAIN_KEYBOARD = [
         ["Настрока аккаунта"],
         # ["Отклики"],
@@ -7,7 +7,7 @@ class Keyboards:
         # ["Подписаться на вакансии"],
     ]
     ACCOUNT_SETTINGS = [["Автопоиски"]]  # , ["Уведомления"]]
-    SAVED_SEARCHES = [["Добавить"], [BACK_TEXT]]
+    SAVED_SEARCHES = [["Добавить", "Изменить"], ["Подписка"], [BACK]]
 
     SUB_VACANCIES = []
 

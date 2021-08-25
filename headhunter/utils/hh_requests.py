@@ -134,9 +134,10 @@ class HHRequester:
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
 
-    def get_autosearches(self, access_token: str) -> HHResponse:
+    def get_autosearches(self, access_token: str, page: int = 0) -> HHResponse:
         url = self.api_base_url + self.autosearches_path
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(url, headers=headers)
+        params = {"page": page}
+        response = requests.get(url, headers=headers, params=params)
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
