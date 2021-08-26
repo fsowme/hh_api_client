@@ -3,7 +3,7 @@ from telegram import Update
 from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
-from bot.callbacks import hello
+from bot.external_funcs import hello
 from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
 from web import hh_requester, user_manager

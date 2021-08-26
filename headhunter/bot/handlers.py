@@ -1,9 +1,9 @@
+from telegram.ext import CallbackQueryHandler as CBQHandler
 from telegram.ext import (
     CommandHandler,
     ConversationHandler,
-    MessageHandler,
     Filters,
-    CallbackQueryHandler,
+    MessageHandler,
 )
 
 from bot import callbacks as cb
@@ -29,12 +29,14 @@ main_conversation = ConversationHandler(
             MessageHandler(Filters.regex("^Назад$"), cb.account_settings),
         ],
         States.SUB_VACANCIES: [
-            CallbackQueryHandler(cb.autosearches, pattern=Keyboards.BACK),
-            CallbackQueryHandler(cb.sub_autosearch_action, pattern=""),
+            CBQHandler(cb.autosearches, pattern=Keyboards.BACK),
+            CBQHandler(cb.sub_autosearch_change_page, pattern="^[0-9]$"),
+            CBQHandler(cb.sub_autosearch_action, pattern=""),
         ],
     },
     fallbacks=[],
     name="main_conv",
     persistent=True,
     allow_reentry=True,
+    conversation_timeout=120,
 )

@@ -1,26 +1,23 @@
 from urllib.parse import urlencode
 
-from telegram import Bot, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import CallbackContext
+from telegram import ReplyKeyboardMarkup as RKMarkup
+from telegram import ReplyKeyboardMarkup as RKRemove
+from telegram import Update
+from telegram.ext import CallbackContext as CBContext
 
-from bot.constants import Keyboards, States
+from bot.constants import CBQueryData, Keyboards, States
 from bot.keyboards import autosearches_keyboard
+from bot.patterns import data_checker
 from config import BotConfig
 from utils.bot_utils import check_user, get_autosearches
-from web import user_manager
+from web import hh_requester, user_manager
 
 
-def hello(bot: Bot, telegram_id):
-    markup = ReplyKeyboardMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
-    text = BotConfig.HELLO_MESSAGE
-    bot.send_message(text=text, reply_markup=markup, chat_id=telegram_id)
-
-
-def start(update: Update, context: CallbackContext):
+def start(update: Update, context: CBContext):
     message = update.message or update.callback_query.message
     telegram_id = update.effective_user.id
     text = "Авторизуйтесь по ссылке с помощью учетной записи hh.ru:\n\n{}\n"
-    markup = ReplyKeyboardRemove()
+    markup = RKRemove()
     state = None
     if user := user_manager.get(telegram_id=telegram_id):
         text = (
@@ -28,9 +25,7 @@ def start(update: Update, context: CallbackContext):
             f" на почту: '{user.email}', если хотите привязать другой аккаунт,"
             " то перейдите по ссылке:\n\n{}\n"
         )
-        markup = ReplyKeyboardMarkup(
-            Keyboards.MAIN_KEYBOARD, resize_keyboard=True
-        )
+        markup = RKMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
         state = States.MAIN_PAGE
     redirect_uri = f"{BotConfig.REDIRECT_URI}?telegram_id={telegram_id}"
     params = {
@@ -45,42 +40,41 @@ def start(update: Update, context: CallbackContext):
 
 
 @check_user(start)
-def account_settings(update: Update, context: CallbackContext):
-    markup = ReplyKeyboardMarkup(
-        Keyboards.ACCOUNT_SETTINGS, resize_keyboard=True
-    )
-    update.message.reply_text(
-        "Вы в меню настроки аккаунта, выберите действие", reply_markup=markup
-    )
+def account_settings(update: Update, context: CBContext):
+    markup = RKMarkup(Keyboards.ACCOUNT_SETTINGS, resize_keyboard=True)
+    text = "Вы в меню настроки аккаунта, выберите действие"
+    update.message.reply_text(text, reply_markup=markup)
     return States.ACCOUNT_SETTINGS
 
 
 @check_user(start)
-def autosearches(update: Update, context: CallbackContext):
+def autosearches(update: Update, context: CBContext):
     text = "Тут можно настрить автопоиски\n"
-    markup = ReplyKeyboardMarkup(
-        Keyboards.SAVED_SEARCHES, resize_keyboard=True, one_time_keyboard=True
-    )
-    update.message.reply_text(text, reply_markup=markup)
+    keyboard = Keyboards.SAVED_SEARCHES
+    markup = RKMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+    if query := update.callback_query:
+        query.message.reply_text(text, reply_markup=markup)
+        query.answer()
+    else:
+        update.message.reply_text(text, reply_markup=markup)
     return States.AUTOSEARCHES
 
 
 @check_user(start)
-def add_autosearch(update: Update, context: CallbackContext):
+def add_autosearch(update: Update, context: CBContext):
     text = f"Action: {update.message.text}"
     update.message.reply_text(text)
     return States.AUTOSEARCHES
 
 
 @check_user(start)
-def change_autosearch(update: Update, context: CallbackContext):
+def change_autosearch(update: Update, context: CBContext):
     return add_autosearch(update, context)
 
 
 @get_autosearches(account_settings)
 @check_user(start)
-def sub_autosearch(update: Update, context: CallbackContext):
-
+def sub_autosearch(update: Update, context: CBContext, page: int = 0):
     markup = autosearches_keyboard(context.user_data["autosearches"])
     text = "Подпишись на вакансии найденные автопоиском:"
     if update.callback_query:
@@ -92,7 +86,24 @@ def sub_autosearch(update: Update, context: CallbackContext):
     return States.SUB_VACANCIES
 
 
+@get_autosearches(account_settings)
 @check_user(start)
-def sub_autosearch_action(update: Update, context: CallbackContext):
-    print(update.callback_query)
-    return sub_autosearch(update, context)
+def sub_autosearch_action(update: Update, context: CBContext, page: int = 0):
+    query = update.callback_query
+    if not data_checker.is_sub_search(query.data):
+        text = f"Error with button, try again or press '{Keyboards.BACK}'"
+        query.answer(text, show_alert=True)
+        # TODO: log it
+    command, search_id = query.data.split(sep=";")
+    access_token = context.user_data["access_token"]
+
+    if command == CBQueryData.SUB_PREFIX:
+        hh_requester.sub_autosearch(access_token, search_id)
+    else:
+        hh_requester.sub_autosearch(access_token, search_id, False)
+    query.answer("Statuses updated")
+    # return sub_autosearch(update, context)
+
+
+def sub_autosearch_change_page(update: Update, context: CBContext):
+    return sub_autosearch(update, context, update.callback_query.data)

@@ -1,16 +1,26 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton as IKButton
+from telegram import InlineKeyboardMarkup as IKMarkup
 
-from bot.constants import Keyboards
+from bot.constants import CBQueryData, Keyboards
 
 
-def autosearches_keyboard(searches: dict) -> InlineKeyboardMarkup:
+def autosearches_keyboard(searches: dict) -> IKMarkup:
     keyboard = []
     for search in searches["items"]:
-        name: str = search["name"]
+        _id, name = search["id"], search["name"]
+        text, button_data = name, CBQueryData.SUB % _id
         if search["subscription"]:
-            name += " \U00002705"
-        search_id: int = search["id"]
-        keyboard.append([InlineKeyboardButton(name, callback_data=search_id)])
-    back_text = Keyboards.BACK
-    keyboard.append([InlineKeyboardButton(back_text, callback_data=back_text)])
-    return InlineKeyboardMarkup(keyboard)
+            text, button_data = Keyboards.TAG % name, CBQueryData.UNSUB % _id
+        keyboard.append([IKButton(text, callback_data=button_data)])
+    back_button = IKButton(Keyboards.BACK, callback_data=Keyboards.BACK)
+    keyboard.append([back_button])
+    page, pages = int(searches["page"]), int(searches["pages"])
+    paginator = []
+    if page > 0:
+        prev_page = IKButton(Keyboards.PREVIOUS, callback_data=str(page - 1))
+        paginator.append(prev_page)
+    if page < pages - 1:
+        next_page = IKButton(Keyboards.NEXT, callback_data=str(page + 1))
+        paginator.append(next_page)
+    keyboard.append(paginator)
+    return IKMarkup(keyboard)

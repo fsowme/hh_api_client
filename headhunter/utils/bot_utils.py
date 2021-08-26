@@ -1,3 +1,4 @@
+from functools import wraps
 from time import time
 
 from telegram import Update
@@ -20,21 +21,27 @@ def get_autosearches(break_function):
     Factory get just one parameter: callback function to be called if
     answer from api of HH invalid or data of answer is empty.
 
-    Decorated function must have two arguments:
-        1. update: telegram.Update
-        2. context: telegram.ext.CallbackContext
+    Decorated function must have two required arguments and
+    one optional argument:
+        required:
+            1. update: telegram.Update
+            2. context: telegram.ext.CallbackContext
+        optional:
+            3. page: int = 0
+    Wrapper function
+
     """
 
     def get_autosearches_decorator(callback_function):
-        def wrapper(update: Update, context: CallbackContext):
+        def wrapper(update: Update, context: CallbackContext, page: int = 0):
             access_token: str = context.user_data["access_token"]
-            autosearch_response = hh_requester.get_autosearches(access_token)
-            if not autosearch_response.is_valid:
+            search_response = hh_requester.get_autosearches(access_token, page)
+            if not search_response.is_valid:
                 update.message.reply_text(
                     "Не удалось получить список автопоисков."
                 )
                 return break_function(update, context)
-            clean_searches = autosearch_response.cleaned_data
+            clean_searches = search_response.cleaned_data
             if clean_searches.get("found") == 0:
                 update.message.reply_text(
                     "Список сохранённых автопоисков пуст"
@@ -42,7 +49,10 @@ def get_autosearches(break_function):
                 return break_function(update, context)
             context.user_data["autosearches"] = clean_searches
             wrapped_result = callback_function(update, context)
-            del context.user_data["autosearches"]
+            try:
+                del context.user_data["autosearches"]
+            except KeyError:
+                pass
             return wrapped_result
 
         return wrapper

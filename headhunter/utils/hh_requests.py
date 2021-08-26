@@ -141,3 +141,13 @@ class HHRequester:
         response = requests.get(url, headers=headers, params=params)
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
+
+    def sub_autosearch(
+        self, access_token: str, search_id: str, is_sub: bool = True
+    ) -> HHResponse:
+        url = self.api_base_url + self.autosearches_path
+        headers = {"Authorization": f"Bearer {access_token}"}
+        params = {"subscription": is_sub}
+        response = requests.put(url, headers=headers, params=params)
+        validator = HHReplyUserInfoValidator(response)
+        return HHResponse(validator)
