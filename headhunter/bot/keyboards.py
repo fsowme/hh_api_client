@@ -10,10 +10,10 @@ def autosearches_keyboard(searches: dict) -> IKMarkup:
         _id, name = search["id"], search["name"]
         text, button_data = name, CBQueryData.SUB % _id
         if search["subscription"]:
-            text, button_data = Keyboards.TAG % name, CBQueryData.UNSUB % _id
+            text = Keyboards.TAG % name
+            button_data = CBQueryData.UNSUB % _id
         keyboard.append([IKButton(text, callback_data=button_data)])
     back_button = IKButton(Keyboards.BACK, callback_data=Keyboards.BACK)
-    keyboard.append([back_button])
     page, pages = int(searches["page"]), int(searches["pages"])
     paginator = []
     if page > 0:
@@ -23,4 +23,5 @@ def autosearches_keyboard(searches: dict) -> IKMarkup:
         next_page = IKButton(Keyboards.NEXT, callback_data=str(page + 1))
         paginator.append(next_page)
     keyboard.append(paginator)
+    keyboard.append([back_button])
     return IKMarkup(keyboard)

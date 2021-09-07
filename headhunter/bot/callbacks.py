@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
 from telegram import ReplyKeyboardMarkup as RKMarkup
-from telegram import ReplyKeyboardMarkup as RKRemove
+from telegram import ReplyKeyboardRemove as RKRemove
 from telegram import Update
 from telegram.ext import CallbackContext as CBContext
 
@@ -22,7 +22,7 @@ def start(update: Update, context: CBContext):
     if user := user_manager.get(telegram_id=telegram_id):
         text = (
             "Вы уже авторизованы с помощью аккаунта hh.ru, зарегестрированного"
-            f" на почту: '{user.email}', если хотите привязать другой аккаунт,"
+            f" на почту: {user.email}, если хотите привязать другой аккаунт,"
             " то перейдите по ссылке:\n\n{}\n"
         )
         markup = RKMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
@@ -64,7 +64,7 @@ def autosearches(update: Update, context: CBContext):
 def add_autosearch(update: Update, context: CBContext):
     text = f"Action: {update.message.text}"
     update.message.reply_text(text)
-    return States.AUTOSEARCHES
+    return autosearches(update, context)
 
 
 @check_user(start)
@@ -78,32 +78,36 @@ def sub_autosearch(update: Update, context: CBContext, page: int = 0):
     markup = autosearches_keyboard(context.user_data["autosearches"])
     text = "Подпишись на вакансии найденные автопоиском:"
     if update.callback_query:
-        # TODO: make unsub from autosearch
         update.callback_query.message.edit_text(text, reply_markup=markup)
         update.callback_query.answer()
-        return States.SUB_VACANCIES
-    update.message.reply_text(text, reply_markup=markup)
+    else:
+        update.message.reply_text(text, reply_markup=markup)
     return States.SUB_VACANCIES
 
 
-@get_autosearches(account_settings)
 @check_user(start)
 def sub_autosearch_action(update: Update, context: CBContext, page: int = 0):
     query = update.callback_query
+    if query.data == Keyboards.BACK:
+        query.delete_message()
+        return autosearches(update, context)
+    error_text = f"Error with button, try again or press '{Keyboards.BACK}'"
     if not data_checker.is_sub_search(query.data):
-        text = f"Error with button, try again or press '{Keyboards.BACK}'"
-        query.answer(text, show_alert=True)
+        query.answer(error_text, show_alert=True)
         # TODO: log it
     command, search_id = query.data.split(sep=";")
     access_token = context.user_data["access_token"]
-
     if command == CBQueryData.SUB_PREFIX:
         hh_requester.sub_autosearch(access_token, search_id)
-    else:
+    elif command == CBQueryData.UNSUB_PREFIX:
         hh_requester.sub_autosearch(access_token, search_id, False)
+    else:
+        query.answer(error_text, show_alert=True)
     query.answer("Statuses updated")
-    # return sub_autosearch(update, context)
+    page = context.user_data.get("page", 0)
+    return sub_autosearch(update, context, page)
 
 
 def sub_autosearch_change_page(update: Update, context: CBContext):
+    context.user_data["page"] = update.callback_query.data
     return sub_autosearch(update, context, update.callback_query.data)

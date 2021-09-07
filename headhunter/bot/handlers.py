@@ -7,7 +7,7 @@ from telegram.ext import (
 )
 
 from bot import callbacks as cb
-from bot.constants import Keyboards, States
+from bot.constants import States
 
 start_handler = CommandHandler("start", callback=cb.start)
 
@@ -29,9 +29,8 @@ main_conversation = ConversationHandler(
             MessageHandler(Filters.regex("^Назад$"), cb.account_settings),
         ],
         States.SUB_VACANCIES: [
-            CBQHandler(cb.autosearches, pattern=Keyboards.BACK),
             CBQHandler(cb.sub_autosearch_change_page, pattern="^[0-9]$"),
-            CBQHandler(cb.sub_autosearch_action, pattern=""),
+            CBQHandler(cb.sub_autosearch_action),
         ],
     },
     fallbacks=[],

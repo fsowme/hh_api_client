@@ -21,4 +21,4 @@ class CBQueryData:
     SEPARATOR = ";"
     SUB_PREFIX, UNSUB_PREFIX = "sub", "unsub"
     SUB = "".join([SUB_PREFIX, SEPARATOR, "%s"])
-    UNSUB = "".join([UNSUB_PREFIX, SEPARATOR, "{}"])
+    UNSUB = "".join([UNSUB_PREFIX, SEPARATOR, "%s"])

@@ -137,7 +137,7 @@ class HHRequester:
     def get_autosearches(self, access_token: str, page: int = 0) -> HHResponse:
         url = self.api_base_url + self.autosearches_path
         headers = {"Authorization": f"Bearer {access_token}"}
-        params = {"page": page}
+        params = {"page": page, "per_page": 1}
         response = requests.get(url, headers=headers, params=params)
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
@@ -145,7 +145,7 @@ class HHRequester:
     def sub_autosearch(
         self, access_token: str, search_id: str, is_sub: bool = True
     ) -> HHResponse:
-        url = self.api_base_url + self.autosearches_path
+        url = self.api_base_url + self.autosearches_path + f"/{search_id}"
         headers = {"Authorization": f"Bearer {access_token}"}
         params = {"subscription": is_sub}
         response = requests.put(url, headers=headers, params=params)

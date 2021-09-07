@@ -1,4 +1,3 @@
-from functools import wraps
 from time import time
 
 from telegram import Update
