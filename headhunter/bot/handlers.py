@@ -20,7 +20,8 @@ main_conversation = ConversationHandler(
             )
         ],
         States.ACCOUNT_SETTINGS: [
-            MessageHandler(Filters.regex("^Автопоиски$"), cb.autosearches)
+            MessageHandler(Filters.regex("^Автопоиски$"), cb.autosearches),
+            MessageHandler(Filters.regex("^Назад$"), cb.to_start),
         ],
         States.AUTOSEARCHES: [
             MessageHandler(Filters.regex("^Добавить$"), cb.add_autosearch),

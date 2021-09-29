@@ -1,12 +1,13 @@
 from abc import ABC, abstractclassmethod
 from json.decoder import JSONDecodeError
-from typing import Dict, List
+from typing import Dict, List, Type
 from urllib.parse import urlencode
 
 import requests
-from requests import Response
 
-from config import FlaskConfig
+from config import BotConfig, FlaskConfig
+from requests import Response, Request
+
 from utils.errors import (
     AUTH_ERR,
     TOKEN_ERR,
@@ -76,7 +77,7 @@ class HHResponse:
         self._response_data = None
 
     @property
-    def is_valid(self, force=False):
+    def is_valid(self, force=False) -> bool:
         if self._is_valid is not None and not force:
             return self._is_valid
         try:
@@ -101,6 +102,7 @@ class HHRequester:
     token_url_path = FlaskConfig.TOKEN_URL_PATH
     redirect_uri = FlaskConfig.REDIRECT_URI
     autosearches_path = FlaskConfig.AUTOSEARCHES_PATH
+    vacancies_path = FlaskConfig.VACANCIES_PATH
 
     def get_user_token(self, code: str, rdr_args: dict = None) -> HHResponse:
         full_rdr_uri = self.redirect_uri
@@ -134,10 +136,14 @@ class HHRequester:
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
 
-    def get_autosearches(self, access_token: str, page: int = 0) -> HHResponse:
+    def get_autosearches(
+        self, access_token: str, page: int = None
+    ) -> HHResponse:
         url = self.api_base_url + self.autosearches_path
         headers = {"Authorization": f"Bearer {access_token}"}
-        params = {"page": page, "per_page": 1}
+        params = {}
+        if page is not None:
+            params = {"page": page, "per_page": BotConfig.SEARCHES_PER_PAGE}
         response = requests.get(url, headers=headers, params=params)
         validator = HHReplyUserInfoValidator(response)
         return HHResponse(validator)
@@ -150,4 +156,35 @@ class HHRequester:
         params = {"subscription": is_sub}
         response = requests.put(url, headers=headers, params=params)
         validator = HHReplyUserInfoValidator(response)
+        return HHResponse(validator)
+
+    def get_vacancies(
+        self, url: str, access_token: str, page: int = None
+    ) -> HHResponse:
+        headers = {"Authorization": f"Bearer {access_token}"}
+        params = {}
+        if page is not None:
+            params.update({"page": page})
+        response = requests.get(url, headers=headers, params=params)
+        validator = HHReplyUserInfoValidator(response)
+        return HHResponse(validator)
+
+    @staticmethod
+    def _get_response(
+        url: str,
+        method: str,
+        cls_validator: Type[HHReplyValidator],
+        headers: dict = None,
+        params: dict = None,
+        data: dict = None,
+        token: str = None,
+    ) -> HHResponse:
+        data = {} if data is None else data
+        headers = {} if headers is None else headers
+        params = {} if params is None else params
+        if token is not None:
+            headers.update({"Authorization": f"Bearer {token}"})
+        _requests = getattr(requests, method)
+        response = _requests(url, headers=headers, params=params)
+        validator = cls_validator(response)
         return HHResponse(validator)

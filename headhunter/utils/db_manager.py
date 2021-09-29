@@ -1,4 +1,5 @@
-from typing import Any, Tuple
+from operator import le
+from typing import Any, Tuple, Generator
 
 from flask_sqlalchemy import Model, SQLAlchemy
 from sqlalchemy.orm.query import Query
@@ -56,3 +57,19 @@ class DBManager:
         object_fields = kwargs | defaults or {}
         instance = self.create(**object_fields)
         return instance, True
+
+    def filter_by(self, **kwargs):
+        return self.query.filter_by(**kwargs).all()
+
+    def values(
+        self, *args, query: Query = None
+    ) -> Generator[dict, None, None]:
+        query = self.query if query is None else query
+        args = args if args else self.model.__table__.columns.keys()
+        entities = [getattr(self.model, arg) for arg in args]
+        objects_values = query.with_entities(*entities)
+        result = (dict(zip(args, instance)) for instance in objects_values)
+        return result
+
+    def all(self):
+        return self.query.all()

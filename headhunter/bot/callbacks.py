@@ -23,7 +23,8 @@ def start(update: Update, context: CBContext):
         text = (
             "Вы уже авторизованы с помощью аккаунта hh.ru, зарегестрированного"
             f" на почту: {user.email}, если хотите привязать другой аккаунт,"
-            " то перейдите по ссылке:\n\n{}\n"
+            " то перейдите по ссылке:\n\n{}\n\nИли выберите нужное действие "
+            "с помощью меню"
         )
         markup = RKMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
         state = States.MAIN_PAGE
@@ -37,6 +38,14 @@ def start(update: Update, context: CBContext):
     hh_auth_url = f"{BotConfig.HH_BASE_URL}{BotConfig.REG_URL_PATH}?{params}"
     message.reply_text(text.format(hh_auth_url), reply_markup=markup)
     return state
+
+
+@check_user(start)
+def to_start(update: Update, context: CBContext):
+    markup = RKMarkup(Keyboards.MAIN_KEYBOARD, resize_keyboard=True)
+    text = "Вы в начальном меню, выберите действие"
+    update.message.reply_text(text, reply_markup=markup)
+    return States.MAIN_PAGE
 
 
 @check_user(start)
@@ -74,7 +83,7 @@ def change_autosearch(update: Update, context: CBContext):
 
 @get_autosearches(account_settings)
 @check_user(start)
-def sub_autosearch(update: Update, context: CBContext, page: int = 0):
+def sub_autosearch(update: Update, context: CBContext, page: int = None):
     markup = autosearches_keyboard(context.user_data["autosearches"])
     text = "Подпишись на вакансии найденные автопоиском:"
     if update.callback_query:
