@@ -135,7 +135,12 @@ class HHRequester:
         validator = HHDataValidator(response)
         return HHResponse(validator)
 
-    def get_autosearches(self, token: str, page: int = None) -> HHResponse:
+    def get_autosearches(
+        self, token: str, page: int = None, recursive: bool = False
+    ) -> HHResponse:
+        if recursive:
+            options = {"token": token, "page": page}
+            return self.get_all_pages(self.get_autosearches, **options)
         params = {} if page is None else {"page": page, "per_page": 1}
         url = self.api_base_url + self.autosearches_path
         response = self._request(url, "get", params=params, token=token)
@@ -152,12 +157,13 @@ class HHRequester:
         return HHResponse(validator)
 
     def get_vacancies(
-        self, url: str, token: str, page: int = None
+        self, url: str, token: str, page: int = None, recursive: bool = False
     ) -> HHResponse:
+        if recursive:
+            options = {"url": url, "token": token, "page": page}
+            return self.get_all_pages(self.get_vacancies, **options)
         params = {} if page is None else {"page": page}
-        response = self._request(
-            url, "get", HHDataValidator, params=params, token=token
-        )
+        response = self._request(url, "get", params=params, token=token)
         validator = HHDataValidator(response)
         return HHResponse(validator)
 
@@ -194,4 +200,3 @@ class HHRequester:
             return items
         options["page"] = next_page
         return self.get_all_pages(method, items=items, **options)
-        # return self.get_all_pages(method, page=next_page, options)
