@@ -9,5 +9,4 @@ class Autosearch:
         self.new_url = new_url
 
     def get_new(self, access_token):
-
         hh_requester.get_vacancies(self.new_url, access_token)

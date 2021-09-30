@@ -1,17 +1,17 @@
 from abc import ABC, abstractclassmethod
 from json.decoder import JSONDecodeError
-from typing import Dict, List, Type
+from typing import Dict, List
 from urllib.parse import urlencode
 
 import requests
 
-from config import BotConfig, FlaskConfig
-from requests import Response, Request
-
+from config import FlaskConfig
+from requests import Response
 from utils.errors import (
     AUTH_ERR,
     TOKEN_ERR,
     GetTokenError,
+    HHError,
     InvalidResponseError,
     OAuthError,
     ServiceUnavailableError,
@@ -36,7 +36,7 @@ class HHReplyValidator(ABC):
         pass
 
 
-class HHReplyTokenValidator(HHReplyValidator):
+class HHTokenValidator(HHReplyValidator):
     def validate(self) -> dict:
         hh_reply = self._get_json()
         if self.hh_response.status_code == 200:
@@ -51,7 +51,7 @@ class HHReplyTokenValidator(HHReplyValidator):
         raise UnknownError()
 
 
-class HHReplyUserInfoValidator(HHReplyValidator):
+class HHDataValidator(HHReplyValidator):
     def validate(self) -> dict:
         hh_reply = self._get_json()
         if self.hh_response.status_code == 200:
@@ -115,8 +115,8 @@ class HHRequester:
             "code": code,
         }
         url = "".join([self.base_url, self.token_url_path])
-        response = requests.post(url=url, data=data)
-        validator = HHReplyTokenValidator(response)
+        response = self._request(url, "post", data=data)
+        validator = HHTokenValidator(response)
         return HHResponse(validator)
 
     def update_token(self, refresh_token) -> HHResponse:
@@ -125,66 +125,73 @@ class HHRequester:
             "refresh_token": refresh_token,
         }
         url = "".join([self.base_url, self.token_url_path])
-        response = requests.post(url=url, data=data)
-        validator = HHReplyTokenValidator(response)
+        response = self._request(url, "post", data=data)
+        validator = HHTokenValidator(response)
         return HHResponse(validator)
 
     def get_user_info(self, access_token: str) -> HHResponse:
         url = self.api_base_url + "/me"
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(url, headers=headers)
-        validator = HHReplyUserInfoValidator(response)
+        response = self._request(url, "get", token=access_token)
+        validator = HHDataValidator(response)
         return HHResponse(validator)
 
-    def get_autosearches(
-        self, access_token: str, page: int = None
-    ) -> HHResponse:
+    def get_autosearches(self, token: str, page: int = None) -> HHResponse:
+        params = {} if page is None else {"page": page, "per_page": 1}
         url = self.api_base_url + self.autosearches_path
-        headers = {"Authorization": f"Bearer {access_token}"}
-        params = {}
-        if page is not None:
-            params = {"page": page, "per_page": BotConfig.SEARCHES_PER_PAGE}
-        response = requests.get(url, headers=headers, params=params)
-        validator = HHReplyUserInfoValidator(response)
+        response = self._request(url, "get", params=params, token=token)
+        validator = HHDataValidator(response)
         return HHResponse(validator)
 
     def sub_autosearch(
-        self, access_token: str, search_id: str, is_sub: bool = True
+        self, token: str, search_id: str, is_sub: bool = True
     ) -> HHResponse:
         url = self.api_base_url + self.autosearches_path + f"/{search_id}"
-        headers = {"Authorization": f"Bearer {access_token}"}
         params = {"subscription": is_sub}
-        response = requests.put(url, headers=headers, params=params)
-        validator = HHReplyUserInfoValidator(response)
+        response = self._request(url, "put", params=params, token=token)
+        validator = HHDataValidator(response)
         return HHResponse(validator)
 
     def get_vacancies(
-        self, url: str, access_token: str, page: int = None
+        self, url: str, token: str, page: int = None
     ) -> HHResponse:
-        headers = {"Authorization": f"Bearer {access_token}"}
-        params = {}
-        if page is not None:
-            params.update({"page": page})
-        response = requests.get(url, headers=headers, params=params)
-        validator = HHReplyUserInfoValidator(response)
+        params = {} if page is None else {"page": page}
+        response = self._request(
+            url, "get", HHDataValidator, params=params, token=token
+        )
+        validator = HHDataValidator(response)
         return HHResponse(validator)
 
     @staticmethod
-    def _get_response(
+    def _request(
         url: str,
         method: str,
-        cls_validator: Type[HHReplyValidator],
         headers: dict = None,
         params: dict = None,
         data: dict = None,
         token: str = None,
-    ) -> HHResponse:
+    ) -> Response:
         data = {} if data is None else data
         headers = {} if headers is None else headers
         params = {} if params is None else params
         if token is not None:
             headers.update({"Authorization": f"Bearer {token}"})
-        _requests = getattr(requests, method)
-        response = _requests(url, headers=headers, params=params)
-        validator = cls_validator(response)
-        return HHResponse(validator)
+        request_method = getattr(requests, method)
+        return request_method(url, headers=headers, params=params, data=data)
+
+    def get_all_pages(
+        self, method, *, items: list = None, **options: dict
+    ) -> list:
+        """Recursively get items from any number of pages from api of hh.ru"""
+        items = [] if items is None else items
+        response: HHResponse = method(**options)
+        if not response.is_valid:
+            raise HHError()
+        items_on_page = response.cleaned_data
+        items.extend(items_on_page["items"])
+        pages = items_on_page["pages"]
+        next_page = items_on_page["page"] + 1
+        if next_page == pages or items_on_page["found"] < 1:
+            return items
+        options["page"] = next_page
+        return self.get_all_pages(method, items=items, **options)
+        # return self.get_all_pages(method, page=next_page, options)

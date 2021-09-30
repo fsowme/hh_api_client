@@ -46,5 +46,4 @@ class BotConfig(Config):
     TOKEN = os.getenv("TG_TOKEN")
     PERSISTENCE = PicklePersistence(os.getenv("PERSISTENCE") or "persist.bin")
     HELLO_MESSAGE = "Привет, спасибо за регистрацию."
-    SEARCHES_PER_PAGE = 1
     NOTIFICATION_INTERVAL = 30  # minutes

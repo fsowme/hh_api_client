@@ -1,3 +1,4 @@
+from bot import notify_job
 from config import BotConfig
 from web import app, db
 from web.models import User
@@ -12,4 +13,7 @@ app.add_url_rule(
 )
 app.shell_context_processor(lambda: context)
 if __name__ == "__main__":
-    app.run("0.0.0.0", "8080", True)
+    from bot import notify_job
+
+    notify_job.start()
+    app.run("0.0.0.0", "8080")
