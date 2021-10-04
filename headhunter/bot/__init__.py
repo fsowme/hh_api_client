@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from telegram.ext import CallbackContext, Updater
 
 from bot.handlers import main_conversation
-from bot.scheduler import get_new_vacancies
+from bot.scheduler import send_vacancies
 from config import BotConfig
 
 load_dotenv()
@@ -18,4 +18,5 @@ DISPATCHER, BOT = UPDATER.dispatcher, UPDATER.bot
 DISPATCHER.add_handler(main_conversation)
 
 notify_job = UPDATER.job_queue
-notify_job.run_once(get_new_vacancies, when=3)
+notify_job.run_repeating(send_vacancies, interval=600, first=5)
+# notify_job.run_once(send_vacancies, when=3)

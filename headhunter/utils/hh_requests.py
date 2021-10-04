@@ -135,12 +135,7 @@ class HHRequester:
         validator = HHDataValidator(response)
         return HHResponse(validator)
 
-    def get_autosearches(
-        self, token: str, page: int = None, recursive: bool = False
-    ) -> HHResponse:
-        if recursive:
-            options = {"token": token, "page": page}
-            return self.get_all_pages(self.get_autosearches, **options)
+    def get_autosearches(self, token: str, page: int = None) -> HHResponse:
         params = {} if page is None else {"page": page, "per_page": 1}
         url = self.api_base_url + self.autosearches_path
         response = self._request(url, "get", params=params, token=token)
@@ -157,11 +152,8 @@ class HHRequester:
         return HHResponse(validator)
 
     def get_vacancies(
-        self, url: str, token: str, page: int = None, recursive: bool = False
+        self, url: str, token: str, page: int = None
     ) -> HHResponse:
-        if recursive:
-            options = {"url": url, "token": token, "page": page}
-            return self.get_all_pages(self.get_vacancies, **options)
         params = {} if page is None else {"page": page}
         response = self._request(url, "get", params=params, token=token)
         validator = HHDataValidator(response)
@@ -184,19 +176,18 @@ class HHRequester:
         request_method = getattr(requests, method)
         return request_method(url, headers=headers, params=params, data=data)
 
-    def get_all_pages(
-        self, method, *, items: list = None, **options: dict
-    ) -> list:
-        """Recursively get items from any number of pages from api of hh.ru"""
-        items = [] if items is None else items
-        response: HHResponse = method(**options)
-        if not response.is_valid:
-            raise HHError()
-        items_on_page = response.cleaned_data
-        items.extend(items_on_page["items"])
-        pages = items_on_page["pages"]
-        next_page = items_on_page["page"] + 1
-        if next_page == pages or items_on_page["found"] < 1:
-            return items
-        options["page"] = next_page
-        return self.get_all_pages(method, items=items, **options)
+
+def get_all_pages(method, *, items: list = None, **options: dict) -> list:
+    """Recursively get items from any number of pages from api of hh.ru"""
+    items = [] if items is None else items
+    response: HHResponse = method(**options)
+    if not response.is_valid:
+        raise HHError()
+    items_on_page = response.cleaned_data
+    items.extend(items_on_page["items"])
+    pages = items_on_page["pages"]
+    next_page = items_on_page["page"] + 1
+    if next_page == pages or items_on_page["found"] < 1:
+        return items
+    options["page"] = next_page
+    return get_all_pages(method, items=items, **options)
