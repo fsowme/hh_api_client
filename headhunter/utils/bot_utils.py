@@ -3,7 +3,6 @@ from time import time
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from config import BotConfig
 from utils.errors import HHError, TokenValidationError
 from utils.tokens import UserToken
 from web import hh_requester, user_manager

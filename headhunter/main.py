@@ -1,4 +1,3 @@
-from bot import notify_job
 from config import BotConfig
 from web import app, db
 from web.models import User

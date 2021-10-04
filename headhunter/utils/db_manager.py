@@ -1,4 +1,3 @@
-from operator import le
 from typing import Any, Tuple, Generator
 
 from flask_sqlalchemy import Model, SQLAlchemy
