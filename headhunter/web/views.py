@@ -15,10 +15,6 @@ def test():
 
 
 def oauth():
-    message = (
-        "Вы авторизовались с помощью аккаунта hh.ru зарегестрированного на "
-        "email: %s."
-    )
     err_status, success_status = "Ошибка", "Успешно"
     if not (code := request.args.get("code")):
         message = "The requested url must contain authorization code"
@@ -57,6 +53,10 @@ def oauth():
         message = "Internal server error"
         return render_template("reg.html", status=err_status, message=message)
     hello(BOT, telegram_id)
+    message = (
+        "Вы авторизовались с помощью аккаунта hh.ru зарегестрированного на "
+        f"email: {user_email}"
+    )
     return render_template("reg.html", status=success_status, message=message)
 
 
