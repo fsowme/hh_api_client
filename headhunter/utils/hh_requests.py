@@ -136,7 +136,7 @@ class HHRequester:
         return HHResponse(validator)
 
     def get_autosearches(self, token: str, page: int = None) -> HHResponse:
-        params = {} if page is None else {"page": page, "per_page": 1}
+        params = {} if page is None else {"page": page}
         url = self.api_base_url + self.autosearches_path
         response = self._request(url, "get", params=params, token=token)
         validator = HHDataValidator(response)

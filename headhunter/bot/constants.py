@@ -5,12 +5,9 @@ class Keyboards:
     NEXT = "Следующая стр."
     MAIN_KEYBOARD = [
         ["Настрока аккаунта"],
-        # ["Отклики"],
-        # ["Вакансии"],
-        # ["Подписаться на вакансии"],
     ]
-    ACCOUNT_SETTINGS = [["Автопоиски"], [BACK]]  # , ["Уведомления"]]
-    SAVED_SEARCHES = [["Добавить", "Изменить"], ["Подписка"], [BACK]]
+    ACCOUNT_SETTINGS = [["Автопоиски"], [BACK]]
+    SAVED_SEARCHES = [["Подписка"], [BACK]]
 
 
 class States:

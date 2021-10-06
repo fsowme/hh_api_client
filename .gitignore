@@ -7,3 +7,5 @@ __pycache__
 persist.bin
 
 local_compose.yaml
+
+notifications
