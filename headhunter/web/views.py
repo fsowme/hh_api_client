@@ -1,39 +1,49 @@
-from flask import request
+from flask import render_template, request
 from telegram import Update
 from werkzeug.exceptions import BadRequest
 
 from bot import BOT, DISPATCHER
 from bot.external_funcs import hello
-from utils.errors import UnknownError, TokenValidationError
 from utils.tokens import UserToken
+from utils.errors import TokenValidationError, UnknownError
 from web import hh_requester, user_manager
 
 
 def test():
-    return {"test": True}
+    context = {"status": "test", "message": 42}
+    return render_template("reg.html", **context)
 
 
 def oauth():
+    message = (
+        "Вы авторизовались с помощью аккаунта hh.ru зарегестрированного на "
+        "email: %s."
+    )
+    err_status, success_status = "Ошибка", "Успешно"
     if not (code := request.args.get("code")):
-        return {"error": "The requested url must contain authorization code"}
+        message = "The requested url must contain authorization code"
+        return render_template("reg.html", status=err_status, message=message)
     if not (telegram_id := request.args.get("telegram_id")):
-        return {"error": "Invalid telegram id"}
+        message = "Invalid telegram id"
+        return render_template("reg.html", status=err_status, message=message)
     rdr_uri_args = {"telegram_id": telegram_id}
     token_hh_response = hh_requester.get_user_token(code, rdr_uri_args)
     if not token_hh_response.is_valid:
-        return {"error": token_hh_response.msg}
+        message = token_hh_response.msg
+        return render_template("reg.html", status=err_status, message=message)
     try:
         token = UserToken.token_from_dict(token_hh_response.cleaned_data)
-    except TokenValidationError as error:
+    except TokenValidationError as err:
         # TODO: log it
-        msg = error.error_text if error.for_user else UnknownError.error_text
-        return {"error": msg}
+        message = err.error_text if err.for_user else UnknownError.error_text
+        return render_template("reg.html", status=err_status, message=message)
     user_hh_response = hh_requester.get_user_info(token.access_token)
     if not user_hh_response.is_valid:
-        return {"error": user_hh_response.msg}
-
+        message = user_hh_response.msg
+        return render_template("reg.html", status=err_status, message=message)
     if not (user_email := user_hh_response.cleaned_data.get("email")):
-        return {"error": "User doesn't have email"}
+        message = "User doesn't have email"
+        return render_template("reg.html", status=err_status, message=message)
     user_fields = {
         "telegram_id": telegram_id,
         "access_token": token.access_token,
@@ -44,9 +54,10 @@ def oauth():
         user_manager.update_or_create(email=user_email, defaults=user_fields)
     except Exception:
         # TODO: log it
-        return {"error": "Internal server error"}
+        message = "Internal server error"
+        return render_template("reg.html", status=err_status, message=message)
     hello(BOT, telegram_id)
-    return "Ok"
+    return render_template("reg.html", status=success_status, message=message)
 
 
 def webhook():
