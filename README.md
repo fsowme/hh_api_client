@@ -54,6 +54,9 @@ Pet-project. Sends new vacancies to telegram from hh.
 
     ```
 
+
+* PostgreSQL and web-server are required to run the application. Sample [docker-compose.yaml file](https://github.com/fsowme/hh_api_client/blob/master/docker-compose.yaml) will help run the application. Telegram bot requires SSL/TLS encryption, therefore the server must be configured to accept connections via the https protocol. Sample nginx config file: [nginx.conf](https://github.com/fsowme/hh_api_client/blob/master/nginx/nginx.conf).
+
 ## Built with
 
 * [Flask](https://flask.palletsprojects.com) - The web framework used
@@ -63,4 +66,3 @@ Pet-project. Sends new vacancies to telegram from hh.
 ## Author
 
 * **Vitalii Mikhailov**
-
